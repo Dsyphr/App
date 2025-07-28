@@ -2,7 +2,6 @@
 
 package io.github.dsyphr.screens.home
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -51,7 +50,7 @@ fun HomeScreen() {
 
         ) { innerPadding ->
 
-        Column(modifier = Modifier.padding(innerPadding), ) {
+        Column(modifier = Modifier.padding(innerPadding)) {
             ChatSearchBar()
             //ChatList()
         }
