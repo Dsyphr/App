@@ -11,6 +11,9 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.github.dsyphr.screens.home.components.ChatSearchBar
 import io.github.dsyphr.screens.home.components.ContactListItem
 
@@ -19,21 +22,25 @@ import io.github.dsyphr.screens.home.components.ContactListItem
 fun HomeScreen() {
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Dsyphr") }, colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                titleContentColor = MaterialTheme.colorScheme.primary,
-            ),
+            Column(modifier = Modifier.padding(bottom = 10.dp)) {
+                TopAppBar(
+                    title = { Text("Dsyphr", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold) },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                    ),
 
-                actions = {
-                    IconButton(onClick = { /* do something */ }) {
-                        Icon(
-                            imageVector = Icons.Filled.Settings, contentDescription = "Settings"
-                        )
-                    }
-                }, navigationIcon = {
-                    // logo
-                })
+                    actions = {
+                        IconButton(onClick = { /* do something */ }) {
+                            Icon(
+                                imageVector = Icons.Filled.Settings, contentDescription = "Settings"
+                            )
+                        }
+                    },
+                    navigationIcon = {
+                        // logo
+                    })
+
+                ChatSearchBar()
+            }
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -47,11 +54,10 @@ fun HomeScreen() {
         ) { innerPadding ->
 
         Column(modifier = Modifier.padding(innerPadding)) {
-            ChatSearchBar()
             LazyColumn {
                 items(50) {
                     ContactListItem()
-                    HorizontalDivider()
+                    //HorizontalDivider()
                 }
             }
         }

@@ -22,14 +22,13 @@ import io.github.dsyphr.enums.ReadStatus
 @Composable
 fun ContactListItem(
     modifier: Modifier = Modifier,
-    name: String = "balls",
+    name: String = "Default Contact",
     lastMessageTime: String = "12:35 pm",
     lastMessage: String = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam interdum gravida feugiat. In tincidunt sem porttitor convallis eleifend. Lorem ipsum dolor sit amet, consectetur adipiscing.",
     readStatus: Enum<ReadStatus> = ReadStatus.READ
 ) {
     ListItem(
         modifier = modifier.padding(vertical = 2.dp),
-        shadowElevation = 20.dp,
         headlineContent = { Text(name) },
         supportingContent = {
             Text(
@@ -38,7 +37,7 @@ fun ContactListItem(
         },
         leadingContent = {
             Icon(
-                Icons.Filled.AccountCircle, contentDescription = null, modifier = Modifier.size(40.dp)
+                Icons.Filled.AccountCircle, contentDescription = null, modifier = Modifier.size(60.dp)
             )
         },
         trailingContent = {

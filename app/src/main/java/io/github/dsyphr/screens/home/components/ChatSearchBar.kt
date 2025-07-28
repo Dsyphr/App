@@ -7,8 +7,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -27,6 +30,7 @@ fun ChatSearchBar(modifier: Modifier = Modifier) {
                 Modifier.padding(horizontal = 16.dp)
             }
         ),
+        shape = MaterialTheme.shapes.extraLarge,
         query = searchText, active = active,
         onQueryChange = { it: String ->
             searchText = it
@@ -42,7 +46,7 @@ fun ChatSearchBar(modifier: Modifier = Modifier) {
         },
         leadingIcon = {
             Icon(
-                imageVector = Icons.Filled.Search, contentDescription = "Search a contact"
+                imageVector = Icons.Filled.Search, contentDescription = "Search a chat"
             )
         },
         windowInsets = WindowInsets(top = 0.dp),
