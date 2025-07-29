@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import io.github.dsyphr.screens.chat.ChatScreen
 import io.github.dsyphr.screens.home.HomeScreen
 import io.github.dsyphr.ui.theme.DsyphrTheme
 
@@ -20,7 +21,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             DsyphrTheme {
-                HomeScreen()
+                //HomeScreen()
+                ChatScreen(sender = "Joe")
             }
         }
     }
