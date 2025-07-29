@@ -11,6 +11,9 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -24,9 +27,18 @@ fun HomeScreen() {
         topBar = {
             Column(modifier = Modifier.padding(bottom = 10.dp)) {
                 TopAppBar(
-                    title = { Text("Dsyphr", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold) },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                    ),
+                    title = {
+                    Text(
+                        "Dsyphr", style = TextStyle(
+                            brush = Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color(0xFFF45DFF), Color(0xFF7907FF),
+                                )
+                            )
+                        ), fontSize = 30.sp, fontWeight = FontWeight.ExtraBold
+                    )
+                }, colors = TopAppBarDefaults.topAppBarColors(
+                ),
 
                     actions = {
                         IconButton(onClick = { /* do something */ }) {
@@ -34,8 +46,7 @@ fun HomeScreen() {
                                 imageVector = Icons.Filled.Settings, contentDescription = "Settings"
                             )
                         }
-                    },
-                    navigationIcon = {
+                    }, navigationIcon = {
                         // logo
                     })
 
