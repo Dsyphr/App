@@ -6,23 +6,24 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.rounded.Send
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import io.github.dsyphr.enums.MessageParty
 import io.github.dsyphr.screens.chat.components.MessageCard
 import io.github.dsyphr.screens.chat.components.MessageItem
 
 
 val messageItems = mutableListOf<MessageItem>(
-    MessageItem("Hello", "John", true),
-    MessageItem("Hello", "John", true),
-    MessageItem("Hello", "John", false),
-    MessageItem("Hello", "John", false),
-    MessageItem("Hello", "John", true),
-    MessageItem("Hello", "John", true),
-    MessageItem("Hello", "John", false),
+    MessageItem("Hello", "John", MessageParty.SELF),
+    MessageItem("Hello", "John", MessageParty.SELF),
+    MessageItem("Hello", "John", MessageParty.OTHER),
+    MessageItem("Hello", "John", MessageParty.OTHER),
+    MessageItem("Hello", "John", MessageParty.SELF),
+    MessageItem("Hello", "John", MessageParty.SELF),
+    MessageItem("Hello", "John", MessageParty.OTHER),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -86,7 +87,7 @@ fun BasicChatInput(modifier: Modifier = Modifier) {
             shape = MaterialTheme.shapes.extraLarge,
         ) {
             Icon(
-                Icons.Rounded.Send, contentDescription = "send button", modifier = Modifier.size(30.dp)
+                Icons.Default.Send, contentDescription = "send", modifier = modifier
             )
         }
     }
