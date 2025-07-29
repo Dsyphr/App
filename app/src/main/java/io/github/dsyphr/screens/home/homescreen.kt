@@ -29,7 +29,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-
 import io.github.dsyphr.screens.home.components.ChatSearchBar
 
 
@@ -72,7 +71,6 @@ fun HomeScreen(){
 
         Column(modifier = Modifier.padding(top = 64.dp)){
             ChatSearchBar()
-
             //ChatList()
         }
 

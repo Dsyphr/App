@@ -1,32 +1,21 @@
 package io.github.dsyphr.screens.home.components
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.isTraversalGroup
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.traversalIndex
+import androidx.compose.ui.unit.dp
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatSearchBar(modifier: Modifier = Modifier) {
@@ -34,10 +23,16 @@ fun ChatSearchBar(modifier: Modifier = Modifier) {
     var searchText by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
     SearchBar(
-        modifier = Modifier.fillMaxWidth(),
-        query = searchText,
-        active = active,
-        onQueryChange = { it:String ->
+        modifier = Modifier.then(
+            if (active) {
+                Modifier.fillMaxWidth()
+            } else {
+                Modifier.padding(horizontal = 16.dp)
+            }
+        ),
+        shape = MaterialTheme.shapes.extraLarge,
+        query = searchText, active = active,
+        onQueryChange = { it: String ->
             searchText = it
         },
         onSearch = {
@@ -51,15 +46,11 @@ fun ChatSearchBar(modifier: Modifier = Modifier) {
         },
         leadingIcon = {
             Icon(
-                imageVector = Icons.Filled.Search,
-                contentDescription = "Search a contact"
+                imageVector = Icons.Filled.Search, contentDescription = "Search a chat"
             )
         },
-
-
-
-    ) {
-    }
+        windowInsets = WindowInsets(top = 0.dp),
+    ) {}
 }
 
 
