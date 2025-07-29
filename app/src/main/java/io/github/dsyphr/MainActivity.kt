@@ -14,8 +14,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             DsyphrTheme {
-                HomeScreen()
-                //ChatScreen(sender = "Joe")
+//                HomeScreen()
+                ChatScreen(sender = "Joe")
             }
         }
     }
