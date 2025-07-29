@@ -30,6 +30,7 @@ val messageItems = mutableListOf<MessageItem>(
 @Composable
 fun ChatScreen(modifier: Modifier = Modifier, sender: String) {
     Scaffold(topBar = {
+
         TopAppBar(
             title = { Text(text = sender) },
             navigationIcon = {
@@ -51,7 +52,9 @@ fun ChatScreen(modifier: Modifier = Modifier, sender: String) {
             )
     }, bottomBar = {
         BasicChatInput()
-    }) { innerPadding ->
+    },
+        modifier = modifier.navigationBarsPadding()
+    ) { innerPadding ->
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(), reverseLayout = true, contentPadding = innerPadding// 5
