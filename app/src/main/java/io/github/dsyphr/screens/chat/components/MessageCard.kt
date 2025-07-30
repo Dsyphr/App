@@ -17,59 +17,56 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.dsyphr.dataClasses.MessageItem
 import io.github.dsyphr.dataClasses.User
-import io.github.dsyphr.enums.MessageParty
-
-
 
 
 @Composable
-fun MessageCard(messageItem: MessageItem, currentUser: User) { // 1
+fun MessageCard(messageItem: MessageItem, secondUser: User) { // 1
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
         horizontalAlignment = when { // 2
-            messageItem.sender == currentUser -> Alignment.End
-            else -> Alignment.Start
+            messageItem.sender == secondUser -> Alignment.Start
+            else -> Alignment.End
         },
     ) {
         Card(
             modifier = Modifier.widthIn(max = 340.dp),
-            shape = cardShapeFor(messageItem, currentUser), // 3
+            shape = cardShapeFor(messageItem, secondUser), // 3
             colors = CardColors(
                 when {
-                    messageItem.sender == currentUser -> MaterialTheme.colorScheme.primaryContainer
-                    else -> MaterialTheme.colorScheme.secondaryContainer
+                    messageItem.sender == secondUser -> MaterialTheme.colorScheme.secondaryContainer
+                    else -> MaterialTheme.colorScheme.primaryContainer
                 },
                 contentColor = when {
-                    messageItem.sender == currentUser -> MaterialTheme.colorScheme.onPrimaryContainer
-                    else -> MaterialTheme.colorScheme.onSecondaryContainer
+                    messageItem.sender == secondUser -> MaterialTheme.colorScheme.onSecondaryContainer
+                    else -> MaterialTheme.colorScheme.onPrimaryContainer
                 },
                 disabledContainerColor = MaterialTheme.colorScheme.background,
                 disabledContentColor = MaterialTheme.colorScheme.background,
             ),
         ) {
             Text(
-                modifier = Modifier.padding(8.dp),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 text = messageItem.message,
                 color = when {
-                    messageItem.sender == currentUser -> MaterialTheme.colorScheme.onPrimaryContainer
-                    else -> MaterialTheme.colorScheme.onSecondaryContainer
+                    messageItem.sender == secondUser -> MaterialTheme.colorScheme.onSecondaryContainer
+                    else -> MaterialTheme.colorScheme.onPrimaryContainer
                 },
             )
         }
         Text(
             // 4
-            text = messageItem.sender.username,
+            text = when {messageItem.sender == secondUser -> messageItem.sender.username; else -> "You"},
             fontSize = 12.sp,
         )
     }
 }
 
 @Composable
-fun cardShapeFor(messageItem: MessageItem, currentUser: User): RoundedCornerShape {
+fun cardShapeFor(messageItem: MessageItem, secondUser: User): RoundedCornerShape {
     val roundedCorners = RoundedCornerShape(16.dp)
     return when {
-        messageItem.sender == currentUser -> roundedCorners.copy(bottomEnd = CornerSize(0))
-        else -> roundedCorners.copy(bottomStart = CornerSize(0))
+        messageItem.sender == secondUser -> roundedCorners.copy(bottomStart = CornerSize(0))
+        else -> roundedCorners.copy(bottomEnd = CornerSize(0))
     }
 }
 
