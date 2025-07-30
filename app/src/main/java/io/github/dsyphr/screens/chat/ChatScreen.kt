@@ -11,28 +11,25 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import io.github.dsyphr.dataClasses.MessageItem
+import io.github.dsyphr.dataClasses.User
 import io.github.dsyphr.enums.MessageParty
 import io.github.dsyphr.screens.chat.components.MessageCard
-import io.github.dsyphr.screens.chat.components.MessageItem
 
 
-val messageItems = mutableListOf<MessageItem>(
-    MessageItem("Hello", "John", MessageParty.SELF),
-    MessageItem("Hello", "John", MessageParty.SELF),
-    MessageItem("Hello", "John", MessageParty.OTHER),
-    MessageItem("Hello", "John", MessageParty.OTHER),
-    MessageItem("Hello", "John", MessageParty.SELF),
-    MessageItem("Hello", "John", MessageParty.SELF),
-    MessageItem("Hello", "John", MessageParty.OTHER),
-)
+val joe = User("John doe", 1, )
+val jake = User("jake ", id = 2)
 
+val msg1 = MessageItem("Hey, how are you doing", joe, jake)
+val msg2 = MessageItem("Hey, how are you doing", jake, joe)
+val messageItems = mutableListOf<MessageItem>(msg1, msg2)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen(modifier: Modifier = Modifier, sender: String) {
+fun ChatScreen(modifier: Modifier = Modifier,currentUser: User) {
     Scaffold(topBar = {
 
         TopAppBar(
-            title = { Text(text = sender) },
+            title = { Text(text = currentUser.username) },
             navigationIcon = {
                 IconButton(onClick = {}) {
                     Icon(
@@ -60,7 +57,7 @@ fun ChatScreen(modifier: Modifier = Modifier, sender: String) {
             modifier = Modifier.fillMaxSize(), reverseLayout = true, contentPadding = innerPadding// 5
         ) {
             items(messageItems) { messageItem ->
-                MessageCard(messageItem)
+                MessageCard(messageItem, currentUser)
             }
         }
 
