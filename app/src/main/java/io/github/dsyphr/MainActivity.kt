@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import io.github.dsyphr.screens.chat.ChatScreen
+import io.github.dsyphr.screens.chat.joe
 import io.github.dsyphr.screens.home.HomeScreen
 import io.github.dsyphr.ui.theme.DsyphrTheme
 
@@ -15,7 +16,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             DsyphrTheme {
 //                HomeScreen()
-                ChatScreen(sender = "Joe")
+                ChatScreen(currentUser = joe)
             }
         }
     }
