@@ -6,29 +6,30 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import io.github.dsyphr.dataClasses.MessageItem
 import io.github.dsyphr.dataClasses.User
 import io.github.dsyphr.dataClasses.messageItems
-import io.github.dsyphr.enums.MessageParty
 import io.github.dsyphr.screens.chat.components.MessageCard
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen(modifier: Modifier = Modifier,secondUser: User) {
-    Scaffold(topBar = {
+fun ChatScreen(modifier: Modifier = Modifier, secondUser: User) {
+    Scaffold(
+        topBar = {
 
         TopAppBar(
             title = { Text(text = secondUser.username) },
             navigationIcon = {
                 IconButton(onClick = {}) {
-                    secondUser.profileImg
+                    Icon(
+                        imageVector = secondUser.profileImg,
+                        contentDescription = secondUser.username,
+                        Modifier.size(40.dp)
+                    )
                 }
             },
             actions = {
@@ -43,8 +44,7 @@ fun ChatScreen(modifier: Modifier = Modifier,secondUser: User) {
             )
     }, bottomBar = {
         BasicChatInput()
-    },
-        modifier = modifier.navigationBarsPadding()
+    }, modifier = modifier.navigationBarsPadding()
     ) { innerPadding ->
 
         LazyColumn(

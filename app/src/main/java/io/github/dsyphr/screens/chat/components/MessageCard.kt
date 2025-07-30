@@ -1,6 +1,7 @@
 package io.github.dsyphr.screens.chat.components
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -28,34 +29,39 @@ fun MessageCard(messageItem: MessageItem, secondUser: User) { // 1
             else -> Alignment.End
         },
     ) {
-        Card(
-            modifier = Modifier.widthIn(max = 340.dp),
-            shape = cardShapeFor(messageItem, secondUser), // 3
-            colors = CardColors(
-                when {
-                    messageItem.sender == secondUser -> MaterialTheme.colorScheme.secondaryContainer
-                    else -> MaterialTheme.colorScheme.primaryContainer
-                },
-                contentColor = when {
-                    messageItem.sender == secondUser -> MaterialTheme.colorScheme.onSecondaryContainer
-                    else -> MaterialTheme.colorScheme.onPrimaryContainer
-                },
-                disabledContainerColor = MaterialTheme.colorScheme.background,
-                disabledContentColor = MaterialTheme.colorScheme.background,
-            ),
-        ) {
-            Text(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                text = messageItem.message,
-                color = when {
-                    messageItem.sender == secondUser -> MaterialTheme.colorScheme.onSecondaryContainer
-                    else -> MaterialTheme.colorScheme.onPrimaryContainer
-                },
-            )
+        Row {
+            messageItem.sender.profileImg
+            Card(
+                modifier = Modifier.widthIn(max = 340.dp),
+                shape = cardShapeFor(messageItem, secondUser), // 3
+                colors = CardColors(
+                    when {
+                        messageItem.sender == secondUser -> MaterialTheme.colorScheme.secondaryContainer
+                        else -> MaterialTheme.colorScheme.primaryContainer
+                    },
+                    contentColor = when {
+                        messageItem.sender == secondUser -> MaterialTheme.colorScheme.onSecondaryContainer
+                        else -> MaterialTheme.colorScheme.onPrimaryContainer
+                    },
+                    disabledContainerColor = MaterialTheme.colorScheme.background,
+                    disabledContentColor = MaterialTheme.colorScheme.background,
+                ),
+            ) {
+                Text(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    text = messageItem.message,
+                    color = when {
+                        messageItem.sender == secondUser -> MaterialTheme.colorScheme.onSecondaryContainer
+                        else -> MaterialTheme.colorScheme.onPrimaryContainer
+                    },
+                )
+            }
         }
         Text(
             // 4
-            text = when {messageItem.sender == secondUser -> messageItem.sender.username; else -> "You"},
+            text = when {
+                messageItem.sender == secondUser -> messageItem.sender.username; else -> "You"
+            },
             fontSize = 12.sp,
         )
     }
