@@ -29,16 +29,6 @@ class MainActivity : ComponentActivity() {
                     NavHost(navController, startDestination = "home") {
                         composable(
                             "home",
-                            enterTransition = {
-                                slideInHorizontally(
-                                    initialOffsetX = { -it }, animationSpec = tween(durationMillis = 300)
-                                )
-                            },
-                            exitTransition = {
-                                slideOutHorizontally(
-                                    targetOffsetX = { -it }, animationSpec = tween(durationMillis = 300)
-                                )
-                            },
                         ) {
                             HomeScreen(onContactClick = { id -> navController.navigate("contact/$id") })
                         }
@@ -55,7 +45,7 @@ class MainActivity : ComponentActivity() {
                                 )
                             },
                         ) {
-                            ChatScreen(secondUser = joe, onBack= { navController.popBackStack() })
+                            ChatScreen(secondUser = joe, onBack = { navController.popBackStack() })
                         }
                     }
                 }
