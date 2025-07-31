@@ -2,6 +2,7 @@
 
 package io.github.dsyphr.screens.home
 
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,7 +23,7 @@ import io.github.dsyphr.screens.home.components.ContactListItem
 
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(onContactClick: (id: Int) -> Unit = {}) {
     Scaffold(
         topBar = {
             Column(modifier = Modifier.padding(bottom = 10.dp)) {
@@ -67,7 +68,7 @@ fun HomeScreen() {
         Column(modifier = Modifier.padding(innerPadding)) {
             LazyColumn {
                 items(50) {
-                    ContactListItem()
+                    ContactListItem(modifier = Modifier.combinedClickable { onContactClick(10) })
                     //HorizontalDivider()
                 }
             }

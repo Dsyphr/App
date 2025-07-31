@@ -4,10 +4,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.dsyphr.dataClasses.User
@@ -17,18 +19,25 @@ import io.github.dsyphr.screens.chat.components.MessageCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen(modifier: Modifier = Modifier, secondUser: User) {
+fun ChatScreen(modifier: Modifier = Modifier, secondUser: User, onBack: () -> Unit = {}) {
     Scaffold(
         topBar = {
 
         TopAppBar(
-            title = { Text(text = secondUser.username) },
-            navigationIcon = {
-                IconButton(onClick = {}) {
+            title = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = secondUser.profileImg,
                         contentDescription = secondUser.username,
                         Modifier.size(40.dp)
+                    )
+                    Text(text = secondUser.username, modifier = Modifier.padding(horizontal = 8.dp))
+                }
+            },
+            navigationIcon = {
+                IconButton(onClick = {onBack()}) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back"
                     )
                 }
             },
