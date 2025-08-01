@@ -16,16 +16,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.dsyphr.dataClasses.Contact
 import io.github.dsyphr.dataClasses.MessageItem
-import io.github.dsyphr.dataClasses.User
 
 
 @Composable
-fun MessageCard(messageItem: MessageItem, secondUser: User) { // 1
+fun MessageCard(messageItem: MessageItem, contact: Contact) { // 1
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
         horizontalAlignment = when { // 2
-            messageItem.sender == secondUser -> Alignment.Start
+            messageItem.sender == contact -> Alignment.Start
             else -> Alignment.End
         },
     ) {
@@ -33,14 +33,14 @@ fun MessageCard(messageItem: MessageItem, secondUser: User) { // 1
             messageItem.sender.profileImg
             Card(
                 modifier = Modifier.widthIn(max = 340.dp),
-                shape = cardShapeFor(messageItem, secondUser), // 3
+                shape = cardShapeFor(messageItem, contact), // 3
                 colors = CardColors(
                     when {
-                        messageItem.sender == secondUser -> MaterialTheme.colorScheme.secondaryContainer
+                        messageItem.sender == contact -> MaterialTheme.colorScheme.secondaryContainer
                         else -> MaterialTheme.colorScheme.primaryContainer
                     },
                     contentColor = when {
-                        messageItem.sender == secondUser -> MaterialTheme.colorScheme.onSecondaryContainer
+                        messageItem.sender == contact -> MaterialTheme.colorScheme.onSecondaryContainer
                         else -> MaterialTheme.colorScheme.onPrimaryContainer
                     },
                     disabledContainerColor = MaterialTheme.colorScheme.background,
@@ -51,7 +51,7 @@ fun MessageCard(messageItem: MessageItem, secondUser: User) { // 1
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     text = messageItem.message,
                     color = when {
-                        messageItem.sender == secondUser -> MaterialTheme.colorScheme.onSecondaryContainer
+                        messageItem.sender == contact -> MaterialTheme.colorScheme.onSecondaryContainer
                         else -> MaterialTheme.colorScheme.onPrimaryContainer
                     },
                 )
@@ -60,7 +60,7 @@ fun MessageCard(messageItem: MessageItem, secondUser: User) { // 1
         Text(
             // 4
             text = when {
-                messageItem.sender == secondUser -> messageItem.sender.username; else -> "You"
+                messageItem.sender == contact -> messageItem.sender.name; else -> "You"
             },
             fontSize = 12.sp,
         )
@@ -68,10 +68,10 @@ fun MessageCard(messageItem: MessageItem, secondUser: User) { // 1
 }
 
 @Composable
-fun cardShapeFor(messageItem: MessageItem, secondUser: User): RoundedCornerShape {
+fun cardShapeFor(messageItem: MessageItem, contact: Contact): RoundedCornerShape {
     val roundedCorners = RoundedCornerShape(16.dp)
     return when {
-        messageItem.sender == secondUser -> roundedCorners.copy(bottomStart = CornerSize(0))
+        messageItem.sender == contact -> roundedCorners.copy(bottomStart = CornerSize(0))
         else -> roundedCorners.copy(bottomEnd = CornerSize(0))
     }
 }

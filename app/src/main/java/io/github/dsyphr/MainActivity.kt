@@ -13,10 +13,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import io.github.dsyphr.dataClasses.Contact
+import io.github.dsyphr.dataClasses.jake
 import io.github.dsyphr.dataClasses.joe
+import io.github.dsyphr.dataClasses.users
 import io.github.dsyphr.screens.chat.ChatScreen
 import io.github.dsyphr.screens.home.HomeScreen
 import io.github.dsyphr.ui.theme.DsyphrTheme
+
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,7 +50,7 @@ class MainActivity : ComponentActivity() {
                                 )
                             },
                         ) {
-                            ChatScreen(secondUser = joe, onBack = { navController.popBackStack() })
+                            ChatScreen(contact = joe, onBack = { navController.popBackStack() })
                         }
                     }
                 }

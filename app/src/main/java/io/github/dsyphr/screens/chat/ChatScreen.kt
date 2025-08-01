@@ -12,14 +12,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import io.github.dsyphr.dataClasses.User
+import io.github.dsyphr.dataClasses.Contact
 import io.github.dsyphr.dataClasses.messageItems
 import io.github.dsyphr.screens.chat.components.MessageCard
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen(modifier: Modifier = Modifier, secondUser: User, onBack: () -> Unit = {}) {
+fun ChatScreen(modifier: Modifier = Modifier, contact: Contact, onBack: () -> Unit = {}) {
     Scaffold(
         topBar = {
 
@@ -27,11 +27,11 @@ fun ChatScreen(modifier: Modifier = Modifier, secondUser: User, onBack: () -> Un
             title = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = secondUser.profileImg,
-                        contentDescription = secondUser.username,
+                        imageVector = contact.profileImg,
+                        contentDescription = contact.name,
                         Modifier.size(40.dp)
                     )
-                    Text(text = secondUser.username, modifier = Modifier.padding(horizontal = 8.dp))
+                    Text(text = contact.name, modifier = Modifier.padding(horizontal = 8.dp))
                 }
             },
             navigationIcon = {
@@ -60,7 +60,7 @@ fun ChatScreen(modifier: Modifier = Modifier, secondUser: User, onBack: () -> Un
             modifier = Modifier.fillMaxSize(), reverseLayout = true, contentPadding = innerPadding// 5
         ) {
             items(messageItems) { messageItem ->
-                MessageCard(messageItem, secondUser)
+                MessageCard(messageItem, contact)
             }
         }
 

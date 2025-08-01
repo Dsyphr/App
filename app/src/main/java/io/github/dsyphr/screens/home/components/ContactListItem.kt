@@ -19,23 +19,26 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import io.github.dsyphr.dataClasses.Contact
+import io.github.dsyphr.dataClasses.MessageItem
 import io.github.dsyphr.enums.ReadStatus
 
 @Composable
 fun ContactListItem(
     modifier: Modifier,
-    name: String = "Default Contact",
+    lastMessage : MessageItem,
+//    contact: Contact,
     lastMessageTime: String = "12:35 pm",
-    lastMessage: String = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam interdum gravida feugiat. In tincidunt sem porttitor convallis eleifend. Lorem ipsum dolor sit amet, consectetur adipiscing.",
+//    lastMessage: String = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam interdum gravida feugiat. In tincidunt sem porttitor convallis eleifend. Lorem ipsum dolor sit amet, consectetur adipiscing.",
     readStatus: Enum<ReadStatus> = ReadStatus.RECEIVED
 ) {
-    ListItem(modifier = modifier.padding(vertical = 2.dp), headlineContent = { Text(name) }, supportingContent = {
+    ListItem(modifier = modifier.padding(vertical = 2.dp), headlineContent = { Text(lastMessage.sender.name) }, supportingContent = {
         Text(
-            softWrap = true, maxLines = 1, overflow = TextOverflow.Ellipsis, text = lastMessage
+            softWrap = true, maxLines = 1, overflow = TextOverflow.Ellipsis, text = lastMessage.sender.name
         )
     }, leadingContent = {
         Icon(
-            Icons.Filled.AccountCircle, contentDescription = null, modifier = Modifier.size(60.dp)
+            lastMessage.sender.profileImg, contentDescription = null, modifier = Modifier.size(60.dp)
         )
     }, trailingContent = {
         Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.SpaceEvenly) {
