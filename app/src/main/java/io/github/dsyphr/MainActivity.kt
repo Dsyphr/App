@@ -18,6 +18,7 @@ import io.github.dsyphr.dataClasses.joe
 import io.github.dsyphr.screens.chat.ChatScreen
 import io.github.dsyphr.screens.home.HomeScreen
 import io.github.dsyphr.screens.loginScreen.LoginScreen
+import io.github.dsyphr.screens.loginScreen.SignupScreen
 import io.github.dsyphr.ui.theme.DsyphrTheme
 
 class MainActivity : ComponentActivity() {
@@ -33,6 +34,11 @@ class MainActivity : ComponentActivity() {
                             "login",
                         ) {
                             LoginScreen(navController)
+                        }
+                        composable(
+                            "signup",
+                        ) {
+                            SignupScreen(navController)
                         }
                         composable(
                             "home",
