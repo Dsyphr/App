@@ -13,9 +13,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.firebase.Firebase
 import io.github.dsyphr.dataClasses.joe
 import io.github.dsyphr.screens.chat.ChatScreen
 import io.github.dsyphr.screens.home.HomeScreen
+import io.github.dsyphr.screens.loginScreen.LoginScreen
 import io.github.dsyphr.ui.theme.DsyphrTheme
 
 class MainActivity : ComponentActivity() {
@@ -26,7 +28,12 @@ class MainActivity : ComponentActivity() {
             DsyphrTheme {
                 Surface {
                     val navController = rememberNavController()
-                    NavHost(navController, startDestination = "home") {
+                    NavHost(navController, startDestination = "login") {
+                        composable(
+                            "login",
+                        ) {
+                            LoginScreen(navController)
+                        }
                         composable(
                             "home",
                         ) {
