@@ -1,6 +1,7 @@
 package io.github.dsyphr.screens.loginScreen
 
 
+import android.widget.Toast
 import io.github.dsyphr.R
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -33,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -40,6 +42,10 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.google.android.gms.auth.api.Auth
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,7 +63,9 @@ fun SignupScreen(navController: NavController) {
         mutableStateOf("")
     }
 
-    Scaffold(
+    val context = LocalContext.current
+
+        Scaffold(
         modifier = Modifier,
         topBar = {
             TopAppBar(
@@ -137,7 +145,21 @@ fun SignupScreen(navController: NavController) {
                 modifier = Modifier.padding(16.dp)
             )
             Button(
-                onClick = { navController.popBackStack() },
+                onClick = {
+
+                    Firebase.auth.createUserWithEmailAndPassword(email, password)
+                        .addOnCompleteListener { task ->  
+                            if(task.isSuccessful){
+                                Toast.makeText(context, "Sign up was successful", Toast.LENGTH_SHORT).show()
+                                navController.popBackStack()
+                            }else{
+                                Toast.makeText(context, "Sign up was not successful", Toast.LENGTH_SHORT).show()
+                                navController.popBackStack()
+                            }
+                        }
+                    
+
+                },
                 enabled = username.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty() && password == confirm_password,
                 modifier = Modifier.fillMaxWidth()
             ) {

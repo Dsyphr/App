@@ -1,6 +1,7 @@
 package io.github.dsyphr.screens.loginScreen
 
 import android.R.attr.padding
+import android.widget.Toast
 import io.github.dsyphr.R
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -37,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode.Companion.Color
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -44,6 +46,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,6 +59,8 @@ fun LoginScreen(navController: NavController) {
     var password by remember() {
         mutableStateOf("")
     }
+    val context = LocalContext.current
+
     Scaffold(
         modifier = Modifier,
         topBar = {
@@ -89,7 +95,8 @@ fun LoginScreen(navController: NavController) {
         ) {
 
         Column(
-            modifier = Modifier.padding(it)
+            modifier = Modifier
+                .padding(it)
                 .background(color = MaterialTheme.colorScheme.background)
                 .fillMaxSize()
                 .padding(16.dp),
@@ -120,7 +127,16 @@ fun LoginScreen(navController: NavController) {
                 modifier = Modifier.padding(16.dp)
             )
             Button(
-                onClick = {},
+                onClick = {
+                    Firebase.auth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
+                        if(task.isSuccessful){
+                            navController.navigate("home")
+                        }else{
+                            Toast.makeText(context,  "Email or password is incorrect", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+
+                },
                 enabled = password.isNotEmpty() && email.isNotEmpty(),
                 modifier = Modifier.fillMaxWidth()
             ) {
