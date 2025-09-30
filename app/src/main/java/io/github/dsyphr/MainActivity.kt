@@ -61,7 +61,7 @@ class MainActivity : ComponentActivity() {
                         composable(
                             "addContact",
                         ) {
-                            AddContact(navController)
+                            AddContact(navController, Firebase.auth.currentUser?.uid)
                         }
                         composable(
                             "signup",

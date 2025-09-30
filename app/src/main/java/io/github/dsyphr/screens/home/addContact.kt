@@ -49,7 +49,7 @@ import kotlinx.coroutines.tasks.await
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 
-fun AddContact(navController: NavController){
+fun AddContact(navController: NavController, currentUid: String?){
     var username by remember() {
         mutableStateOf("")
     }
@@ -129,8 +129,8 @@ fun AddContact(navController: NavController){
                         userID = findUserIDbyUsername(username)
 
                         if(userID != null){
-                            Toast.makeText(context, "${userID}", Toast.LENGTH_SHORT).show()
-//                            database.child("users").child("contacts").setValue()// todo
+                            Toast.makeText(context, "Added ${username} to your contacts", Toast.LENGTH_SHORT).show()
+                            database.child("users").child(currentUid!!).child("contacts").child(userID!!).setValue(username)
                             navController.popBackStack()
                         }else{
                             Toast.makeText(context, "User might not exist", Toast.LENGTH_SHORT).show()
