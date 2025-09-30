@@ -19,37 +19,31 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.childEvents
 import com.google.firebase.database.database
 import io.github.dsyphr.R
-
-
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,6 +53,13 @@ fun AddContact(navController: NavController){
     var username by remember() {
         mutableStateOf("")
     }
+    var userID: String? by remember {
+        mutableStateOf("")
+    }
+    val database = Firebase.database.reference
+    suspend fun findUserIDbyUsername(username: String): String? =
+        database.child("users").get().await().children
+            .firstOrNull { it.child("username").getValue(String::class.java) == username }?.key
 
 
     Scaffold(
@@ -120,10 +121,23 @@ fun AddContact(navController: NavController){
             Spacer(
                 modifier = Modifier.padding(16.dp)
             )
+            val coroutineScope = rememberCoroutineScope()
+            val context = LocalContext.current
             Button(
                 onClick = {
+                    coroutineScope.launch {
+                        userID = findUserIDbyUsername(username)
 
-                    navController.popBackStack()
+                        if(userID != null){
+                            Toast.makeText(context, "${userID}", Toast.LENGTH_SHORT).show()
+//                            database.child("users").child("contacts").setValue()// todo
+                            navController.popBackStack()
+                        }else{
+                            Toast.makeText(context, "User might not exist", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+
+
                 },
                 enabled = username.isNotEmpty(),
                 modifier = Modifier.fillMaxWidth()
