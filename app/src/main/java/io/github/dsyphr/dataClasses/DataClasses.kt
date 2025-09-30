@@ -12,6 +12,8 @@ data class User(
     val username: String, val id: Int, val profileImg: ImageVector = Icons.Filled.AccountCircle,
 )
 
+data class UserProfile(val username: String, val email: String)
+
 data class MessageItem(val message: String, val sender: User, val receiver: User)
 
 

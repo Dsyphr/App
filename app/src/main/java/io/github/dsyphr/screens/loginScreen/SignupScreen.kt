@@ -1,6 +1,7 @@
 package io.github.dsyphr.screens.loginScreen
 
 
+import android.annotation.SuppressLint
 import android.widget.Toast
 import io.github.dsyphr.R
 import androidx.compose.foundation.Image
@@ -46,10 +47,28 @@ import com.google.android.gms.auth.api.Auth
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.database
+import io.github.dsyphr.dataClasses.UserProfile
 
+
+private val db = Firebase.database.reference
+
+fun writeNewUser(userId: String, name: String, email: String) {
+    val user = UserProfile(name, email = email)
+
+    db.child("users").child(userId).setValue(user)
+
+}
+
+
+
+@SuppressLint("SuspiciousIndentation")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignupScreen(navController: NavController) {
+
+
     var email by remember() {
         mutableStateOf("")
     }
@@ -148,13 +167,27 @@ fun SignupScreen(navController: NavController) {
                 onClick = {
 
                     Firebase.auth.createUserWithEmailAndPassword(email, password)
-                        .addOnCompleteListener { task ->  
-                            if(task.isSuccessful){
-                                Toast.makeText(context, "Sign up was successful", Toast.LENGTH_SHORT).show()
-                                navController.popBackStack()
-                            }else{
-                                Toast.makeText(context, "Sign up was not successful", Toast.LENGTH_SHORT).show()
-                                navController.popBackStack()
+                        .addOnCompleteListener { task ->
+                            val user = Firebase.auth.currentUser
+                            if (task.isSuccessful) {
+                                // Get the newly created user from the task result
+                                val user = Firebase.auth.currentUser
+
+                                // Ensure the user is not null and get the UID
+                                user?.let {
+                                    val userId = it.uid
+                                    // Pass the retrieved userId to your database function
+                                    writeNewUser(userId = userId, email = email, name = username)
+
+                                    Toast.makeText(context, "Sign up was successful", Toast.LENGTH_SHORT).show()
+                                    navController.popBackStack()
+                                } ?: run {
+                                    Toast.makeText(context, "Failed to retrieve user data.", Toast.LENGTH_SHORT).show()
+                                    navController.popBackStack()
+                                }
+                            } else {
+                                Toast.makeText(context, "Sign up was not successful: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+
                             }
                         }
                     

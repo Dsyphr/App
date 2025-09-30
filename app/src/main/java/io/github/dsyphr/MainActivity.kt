@@ -34,6 +34,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         FirebaseApp.initializeApp(this)
 
+
+
         setContent {
             DsyphrTheme {
                 Surface {

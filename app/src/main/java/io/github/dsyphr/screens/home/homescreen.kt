@@ -2,6 +2,7 @@
 
 package io.github.dsyphr.screens.home
 
+import android.widget.Toast
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -14,12 +15,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
+import com.google.firebase.database.database
 import io.github.dsyphr.screens.home.components.ChatSearchBar
 import io.github.dsyphr.screens.home.components.ContactListItem
+
 
 
 @Composable
@@ -29,6 +35,7 @@ fun HomeScreen(onContactClick: (id: Int) -> Unit = {}) {
             Column(modifier = Modifier.padding(bottom = 10.dp)) {
                 TopAppBar(
                     title = {
+
                     Text(
                         "Dsyphr", style = TextStyle(
                             brush = Brush.horizontalGradient(
