@@ -23,6 +23,7 @@ import com.google.firebase.auth.auth
 import com.google.firebase.initialize
 import io.github.dsyphr.dataClasses.joe
 import io.github.dsyphr.screens.chat.ChatScreen
+import io.github.dsyphr.screens.home.AddContact
 import io.github.dsyphr.screens.home.HomeScreen
 import io.github.dsyphr.screens.loginScreen.LoginScreen
 import io.github.dsyphr.screens.loginScreen.SignupScreen
@@ -58,6 +59,11 @@ class MainActivity : ComponentActivity() {
                             LoginScreen(navController)
                         }
                         composable(
+                            "addContact",
+                        ) {
+                            AddContact(navController)
+                        }
+                        composable(
                             "signup",
                         ) {
                             SignupScreen(navController)
@@ -65,7 +71,7 @@ class MainActivity : ComponentActivity() {
                         composable(
                             "home",
                         ) {
-                            HomeScreen(onContactClick = { id -> navController.navigate("contact/$id") })
+                            HomeScreen(onContactClick = { id -> navController.navigate("contact/$id") }, navController)
                         }
                         composable(
                             "contact/{id}", arguments = listOf(navArgument("id") { type = NavType.IntType }),

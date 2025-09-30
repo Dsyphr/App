@@ -20,6 +20,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.database.database
@@ -29,7 +30,7 @@ import io.github.dsyphr.screens.home.components.ContactListItem
 
 
 @Composable
-fun HomeScreen(onContactClick: (id: Int) -> Unit = {}) {
+fun HomeScreen(onContactClick: (id: Int) -> Unit = {}, navController: NavController) {
     Scaffold(
         topBar = {
             Column(modifier = Modifier.padding(bottom = 10.dp)) {
@@ -64,7 +65,7 @@ fun HomeScreen(onContactClick: (id: Int) -> Unit = {}) {
         floatingActionButton = {
             FloatingActionButton(
                 containerColor = MaterialTheme.colorScheme.primary, onClick = {
-                    // do something
+                    navController.navigate("addContact")
                 }) {
                 Icon(Icons.Filled.Create, contentDescription = "Create a chat")
             }
