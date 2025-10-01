@@ -112,7 +112,7 @@ fun HomeScreen(onContactClick: (String, String) -> Unit = {_, _ ->}, navControll
 
                     ContactListItem(
                         modifier = Modifier.combinedClickable { onContactClick(contacts[it], contactID[it]) },
-                        contacts[it],
+                        contacts[it], //last message
                     )
                     //HorizontalDivider()
                 }

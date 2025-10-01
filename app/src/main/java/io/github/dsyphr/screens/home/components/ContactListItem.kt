@@ -19,12 +19,14 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import io.github.dsyphr.dataClasses.MessageItem
 import io.github.dsyphr.enums.ReadStatus
 
 @Composable
 fun ContactListItem(
     modifier: Modifier,
     name: String = "Default Contact",
+    last: MessageItem,
     lastMessageTime: String = "",
     lastMessage: String = "",
     readStatus: Enum<ReadStatus> = ReadStatus.RECEIVED

@@ -182,7 +182,7 @@ fun BasicChatInput(modifier: Modifier = Modifier, currentChatId: String) {
                     message = message,
                     senderID = current_userID,
                 )
-                Firebase.database.reference.child("chats").child("lastmessage").setValue(messageToSend)
+                Firebase.database.reference.child("chats").child(currentChatId).child("lastmessage").setValue(messageToSend)
                 database.push().setValue(messageToSend)
                 message = ""
             },
