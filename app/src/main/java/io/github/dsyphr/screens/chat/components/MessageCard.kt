@@ -25,7 +25,7 @@ fun MessageCard(messageItem: MessageItem, secondUser: User) { // 1
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
         horizontalAlignment = when { // 2
-            messageItem.sender == secondUser -> Alignment.Start
+            messageItem.sender.username == secondUser.username -> Alignment.Start
             else -> Alignment.End
         },
     ) {
@@ -36,11 +36,11 @@ fun MessageCard(messageItem: MessageItem, secondUser: User) { // 1
                 shape = cardShapeFor(messageItem, secondUser), // 3
                 colors = CardColors(
                     when {
-                        messageItem.sender == secondUser -> MaterialTheme.colorScheme.secondaryContainer
+                        messageItem.sender.username == secondUser.username -> MaterialTheme.colorScheme.secondaryContainer
                         else -> MaterialTheme.colorScheme.primaryContainer
                     },
                     contentColor = when {
-                        messageItem.sender == secondUser -> MaterialTheme.colorScheme.onSecondaryContainer
+                        messageItem.sender.username == secondUser.username -> MaterialTheme.colorScheme.onSecondaryContainer
                         else -> MaterialTheme.colorScheme.onPrimaryContainer
                     },
                     disabledContainerColor = MaterialTheme.colorScheme.background,
@@ -51,7 +51,7 @@ fun MessageCard(messageItem: MessageItem, secondUser: User) { // 1
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     text = messageItem.message,
                     color = when {
-                        messageItem.sender == secondUser -> MaterialTheme.colorScheme.onSecondaryContainer
+                        messageItem.sender.username == secondUser.username -> MaterialTheme.colorScheme.onSecondaryContainer
                         else -> MaterialTheme.colorScheme.onPrimaryContainer
                     },
                 )
@@ -60,7 +60,7 @@ fun MessageCard(messageItem: MessageItem, secondUser: User) { // 1
         Text(
             // 4
             text = when {
-                messageItem.sender == secondUser -> messageItem.sender.username; else -> "You"
+                messageItem.sender.username == secondUser.username -> messageItem.sender.username; else -> "You"
             },
             fontSize = 12.sp,
         )
@@ -71,7 +71,7 @@ fun MessageCard(messageItem: MessageItem, secondUser: User) { // 1
 fun cardShapeFor(messageItem: MessageItem, secondUser: User): RoundedCornerShape {
     val roundedCorners = RoundedCornerShape(16.dp)
     return when {
-        messageItem.sender == secondUser -> roundedCorners.copy(bottomStart = CornerSize(0))
+        messageItem.sender.username == secondUser.username -> roundedCorners.copy(bottomStart = CornerSize(0))
         else -> roundedCorners.copy(bottomEnd = CornerSize(0))
     }
 }

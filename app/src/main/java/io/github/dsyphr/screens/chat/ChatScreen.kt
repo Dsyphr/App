@@ -16,12 +16,21 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
 import io.github.dsyphr.dataClasses.DatabaseMessageItem
 import io.github.dsyphr.dataClasses.MessageItem
 import io.github.dsyphr.dataClasses.User
-import io.github.dsyphr.dataClasses.messageItems
 import io.github.dsyphr.screens.chat.components.MessageCard
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 
 fun generateChatId(uid1: String, uid2: String): String {
@@ -36,7 +45,63 @@ val current_userID = Firebase.auth.currentUser?.uid.toString()
 fun ChatScreen(modifier: Modifier = Modifier, secondUser: User, onBack: () -> Unit = {}) {
 
     val currentChatId = generateChatId(current_userID, secondUser.uid)
+    val database = Firebase.database.reference.child("chats").child(currentChatId).child("messages")
+    val messageItems = remember { mutableStateListOf<MessageItem>() }
+    val context = LocalContext.current
 
+    LaunchedEffect(currentChatId) {
+        database.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val newMessages = mutableListOf<MessageItem>()
+                val usernameFetchJobs = mutableListOf<Deferred<Pair<String, DatabaseMessageItem>>>()
+
+                // First, collect all messages and prepare username fetch jobs
+                for (message in dataSnapshot.children) {
+                    val senderId = message.child("senderID").value.toString()
+                    val text = message.child("message").value.toString()
+
+                    val dbMessageItem = DatabaseMessageItem(
+                        message = text,
+                        senderID = senderId
+                    )
+
+                    val job = CoroutineScope(Dispatchers.IO).async {
+                        val username = try {
+                            Firebase.database.reference
+                                .child("users")
+                                .child(senderId)
+                                .child("username")
+                                .get()
+                                .await()
+                                .value.toString()
+                        } catch (e: Exception) {
+                            "Unknown"
+                        }
+                        username to dbMessageItem
+                    }
+                    usernameFetchJobs.add(job)
+                }
+
+                CoroutineScope(Dispatchers.Main).launch {
+                    usernameFetchJobs.awaitAll().forEach { (username, dbMessageItem) ->
+                        newMessages.add(
+                            MessageItem(
+                                dbMessageItem.message,
+                                sender = User(username, uid = dbMessageItem.senderID)
+                            )
+                        )
+                    }
+
+                    messageItems.clear()
+                    messageItems.addAll(newMessages.sortedBy { it.timestamp }.reversed()) // Or use timestamp if available
+                }
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                Toast.makeText(context, "Failed to load messages", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
 
 
     Scaffold(
@@ -79,7 +144,9 @@ fun ChatScreen(modifier: Modifier = Modifier, secondUser: User, onBack: () -> Un
             modifier = Modifier.fillMaxSize(), reverseLayout = true, contentPadding = innerPadding// 5
         ) {
             items(messageItems) { messageItem ->
+
                 MessageCard(messageItem, secondUser)
+
             }
         }
 
@@ -107,7 +174,7 @@ fun BasicChatInput(modifier: Modifier = Modifier, currentChatId: String) {
             modifier = Modifier.weight(1f),
             placeholder = { Text("Type a message...") },
         )
-        val context = LocalContext.current
+
         FilledIconButton(
             onClick = {
 
@@ -115,7 +182,7 @@ fun BasicChatInput(modifier: Modifier = Modifier, currentChatId: String) {
                     message = message,
                     senderID = current_userID,
                 )
-
+                Firebase.database.reference.child("chats").child("lastmessage").setValue(messageToSend)
                 database.push().setValue(messageToSend)
                 message = ""
             },

@@ -25,8 +25,8 @@ import io.github.dsyphr.enums.ReadStatus
 fun ContactListItem(
     modifier: Modifier,
     name: String = "Default Contact",
-    lastMessageTime: String = "12:35 pm",
-    lastMessage: String = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam interdum gravida feugiat. In tincidunt sem porttitor convallis eleifend. Lorem ipsum dolor sit amet, consectetur adipiscing.",
+    lastMessageTime: String = "",
+    lastMessage: String = "",
     readStatus: Enum<ReadStatus> = ReadStatus.RECEIVED
 ) {
     ListItem(modifier = modifier.padding(vertical = 2.dp), headlineContent = { Text(name) }, supportingContent = {

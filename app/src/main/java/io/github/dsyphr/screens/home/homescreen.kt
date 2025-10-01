@@ -3,8 +3,6 @@
 package io.github.dsyphr.screens.home
 
 
-import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -27,7 +25,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -45,14 +42,13 @@ import io.github.dsyphr.screens.home.components.ContactListItem
 @Composable
 fun HomeScreen(onContactClick: (String, String) -> Unit = {_, _ ->}, navController: NavController, uid: String?) {
     val db = Firebase.database.reference.child("users").child(uid!!).child("contacts")
-    var contacts = remember {
+    val contacts = remember {
         mutableStateListOf<String>()
     }
-    var contactID = remember {
+    val contactID = remember {
         mutableStateListOf<String>()
     }
 
-    val context = LocalContext.current
     db.addValueEventListener(object : ValueEventListener {
         override fun onDataChange(dataSnapshot: DataSnapshot) {
             for (contact in dataSnapshot.children) {
@@ -67,6 +63,7 @@ fun HomeScreen(onContactClick: (String, String) -> Unit = {_, _ ->}, navControll
             // ...
         }
     })
+
     Scaffold(
         topBar = {
             Column(modifier = Modifier.padding(bottom = 10.dp)) {
@@ -115,7 +112,7 @@ fun HomeScreen(onContactClick: (String, String) -> Unit = {_, _ ->}, navControll
 
                     ContactListItem(
                         modifier = Modifier.combinedClickable { onContactClick(contacts[it], contactID[it]) },
-                        contacts[it]
+                        contacts[it],
                     )
                     //HorizontalDivider()
                 }
