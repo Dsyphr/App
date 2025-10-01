@@ -20,7 +20,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -35,34 +37,81 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
+import io.github.dsyphr.dataClasses.DatabaseMessageItem
+import io.github.dsyphr.screens.chat.current_userID
+import io.github.dsyphr.screens.chat.generateChatId
 import io.github.dsyphr.screens.home.components.ChatSearchBar
 import io.github.dsyphr.screens.home.components.ContactListItem
 
 
+data class ContactWithLastMessage(
+    val username: String,
+    val contactId: String,
+    var lastMessage: DatabaseMessageItem?
+)
+
 @Composable
 fun HomeScreen(onContactClick: (String, String) -> Unit = {_, _ ->}, navController: NavController, uid: String?) {
     val db = Firebase.database.reference.child("users").child(uid!!).child("contacts")
-    val contacts = remember {
-        mutableStateListOf<String>()
-    }
-    val contactID = remember {
-        mutableStateListOf<String>()
-    }
+    val contactsWithMessages = remember { mutableStateListOf<ContactWithLastMessage>() }
 
     db.addValueEventListener(object : ValueEventListener {
         override fun onDataChange(dataSnapshot: DataSnapshot) {
-            for (contact in dataSnapshot.children) {
-                contacts.add(contact.value as String)
-                contactID.add(contact.key as String)
+            val tempContacts = mutableListOf<ContactWithLastMessage>()
 
+            // First, collect all contacts
+            for (contact in dataSnapshot.children) {
+                val username = contact.value as String
+                val contactId = contact.key as String
+                tempContacts.add(ContactWithLastMessage(username, contactId, null))
+            }
+
+            // Update the state with contacts (without last messages yet)
+            contactsWithMessages.clear()
+            contactsWithMessages.addAll(tempContacts)
+
+            // Then fetch last messages for each contact
+            tempContacts.forEach { contact ->
+                val chatId = generateChatId(current_userID, contact.contactId)
+
+                Firebase.database.reference
+                    .child("chats")
+                    .child(chatId)
+                    .child("lastmessage")
+                    .get()
+                    .addOnSuccessListener { dataSnapshot ->
+                        if (dataSnapshot.exists()) {
+                            try {
+                                val senderId = dataSnapshot.child("senderID").value?.toString() ?: ""
+                                val messageText = dataSnapshot.child("message").value?.toString() ?: ""
+
+                                val messageItem = DatabaseMessageItem(
+                                    message = messageText,
+                                    senderID = senderId
+                                )
+
+                                // Find and update the specific contact in the state list
+                                val index = contactsWithMessages.indexOfFirst {
+                                    it.contactId == contact.contactId
+                                }
+                                if (index != -1) {
+                                    contactsWithMessages[index] = contactsWithMessages[index].copy(
+                                        lastMessage = messageItem
+                                    )
+                                }
+                            } catch (e: Exception) {
+                            }
+                        }
+                    }
+                    .addOnFailureListener {
+                    }
             }
         }
 
         override fun onCancelled(databaseError: DatabaseError) {
-            // Getting Post failed, log a message
-            // ...
         }
     })
+
 
     Scaffold(
         topBar = {
@@ -108,13 +157,14 @@ fun HomeScreen(onContactClick: (String, String) -> Unit = {_, _ ->}, navControll
 
         Column(modifier = Modifier.padding(innerPadding)) {
             LazyColumn {
-                items(contacts.size) {
-
+                items(contactsWithMessages.size) { contact ->
                     ContactListItem(
-                        modifier = Modifier.combinedClickable { onContactClick(contacts[it], contactID[it]) },
-                        contacts[it], //last message
+                        modifier = Modifier.combinedClickable {
+                            onContactClick(contactsWithMessages[contact].username, contactsWithMessages[contact].contactId)
+                        },
+                        name = contactsWithMessages[contact].username,
+                        last = contactsWithMessages[contact].lastMessage
                     )
-                    //HorizontalDivider()
                 }
             }
         }

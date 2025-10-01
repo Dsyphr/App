@@ -1,5 +1,6 @@
 package io.github.dsyphr.screens.home.components
 
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -19,18 +20,29 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.google.firebase.Timestamp
+import io.github.dsyphr.dataClasses.DatabaseMessageItem
 import io.github.dsyphr.dataClasses.MessageItem
 import io.github.dsyphr.enums.ReadStatus
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun ContactListItem(
     modifier: Modifier,
     name: String = "Default Contact",
-    last: MessageItem,
-    lastMessageTime: String = "",
-    lastMessage: String = "",
+    last: DatabaseMessageItem?,
+
     readStatus: Enum<ReadStatus> = ReadStatus.RECEIVED
 ) {
+    val lastMessageTime = "12:35 PM"
+    val lastMessage = last?.message.toString()
+    if(last == null){
+        val lastMessageTime = "12:35 PM"
+        val lastMessage = ""
+    }
+
     ListItem(modifier = modifier.padding(vertical = 2.dp), headlineContent = { Text(name) }, supportingContent = {
         Text(
             softWrap = true, maxLines = 1, overflow = TextOverflow.Ellipsis, text = lastMessage
