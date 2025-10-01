@@ -13,6 +13,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -30,6 +31,7 @@ import io.github.dsyphr.screens.loginScreen.LoginScreen
 import io.github.dsyphr.screens.loginScreen.SignupScreen
 import io.github.dsyphr.ui.theme.DsyphrTheme
 
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,9 +48,9 @@ class MainActivity : ComponentActivity() {
                     var start by remember {
                         mutableStateOf("")
                     }
-                    if(Firebase.auth.currentUser != null){
+                    if (Firebase.auth.currentUser != null) {
                         start = "home"
-                    }else{
+                    } else {
                         start = "login"
                     }
 
@@ -73,25 +75,40 @@ class MainActivity : ComponentActivity() {
                             "home",
                         ) {
                             HomeScreen(
-                                onContactClick = { username -> navController.navigate("contact/$username") }, navController,
-                                Firebase.auth.currentUser?.uid )
+                                onContactClick = { username, uid -> navController.navigate("contact/$username/$uid") },
+                                navController,
+                                Firebase.auth.currentUser?.uid
+                            )
 
                         }
                         composable(
-                            "contact/{username}", arguments = listOf(navArgument("username") { type = NavType.StringType }),
+                            "contact/{username}/{uid}",
+                            arguments = listOf(
+                                navArgument("username") {
+                                    type = NavType.StringType
+                                },
+                                navArgument("uid"){
+                                    type = NavType.StringType
+                                }
+                            ),
                             enterTransition = {
                                 slideInHorizontally(
-                                    initialOffsetX = { it }, animationSpec = tween(durationMillis = 300)
+                                    initialOffsetX = { it },
+                                    animationSpec = tween(durationMillis = 300)
                                 )
                             },
                             exitTransition = {
                                 slideOutHorizontally(
-                                    targetOffsetX = { it }, animationSpec = tween(durationMillis = 300)
+                                    targetOffsetX = { it },
+                                    animationSpec = tween(durationMillis = 300)
                                 )
                             },
                         ) {
                             val username = it.arguments?.getString("username")
-                            ChatScreen(secondUser = User(username.toString()), onBack = { navController.popBackStack() })
+                            val uid = it.arguments?.getString("uid")
+                            ChatScreen(
+                                secondUser = User(username.toString(), uid!!),
+                                onBack = { navController.popBackStack() })
                         }
                     }
                 }

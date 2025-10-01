@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 
 data class User(
-    val username: String, val profileImg: ImageVector = Icons.Filled.AccountCircle,
+    val username: String, val uid:String , val profileImg: ImageVector = Icons.Filled.AccountCircle,
 )
 
 data class UserProfile(val username: String, val email: String)

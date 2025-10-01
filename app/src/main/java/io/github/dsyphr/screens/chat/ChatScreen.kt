@@ -12,11 +12,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
+import com.google.firebase.database.database
 import io.github.dsyphr.dataClasses.User
 import io.github.dsyphr.dataClasses.messageItems
 import io.github.dsyphr.screens.chat.components.MessageCard
 
 
+
+val current_userID = Firebase.auth.currentUser?.uid.toString()
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(modifier: Modifier = Modifier, secondUser: User, onBack: () -> Unit = {}) {

@@ -43,9 +43,12 @@ import io.github.dsyphr.screens.home.components.ContactListItem
 
 
 @Composable
-fun HomeScreen(onContactClick: (String) -> Unit = {}, navController: NavController, uid: String?) {
+fun HomeScreen(onContactClick: (String, String) -> Unit = {_, _ ->}, navController: NavController, uid: String?) {
     val db = Firebase.database.reference.child("users").child(uid!!).child("contacts")
     var contacts = remember {
+        mutableStateListOf<String>()
+    }
+    var contactID = remember {
         mutableStateListOf<String>()
     }
 
@@ -54,6 +57,7 @@ fun HomeScreen(onContactClick: (String) -> Unit = {}, navController: NavControll
         override fun onDataChange(dataSnapshot: DataSnapshot) {
             for (contact in dataSnapshot.children) {
                 contacts.add(contact.value as String)
+                contactID.add(contact.key as String)
 
             }
         }
@@ -110,7 +114,7 @@ fun HomeScreen(onContactClick: (String) -> Unit = {}, navController: NavControll
                 items(contacts.size) {
 
                     ContactListItem(
-                        modifier = Modifier.combinedClickable { onContactClick(contacts[it]) },
+                        modifier = Modifier.combinedClickable { onContactClick(contacts[it], contactID[it]) },
                         contacts[it]
                     )
                     //HorizontalDivider()
