@@ -9,6 +9,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -20,6 +21,7 @@ import androidx.navigation.navArgument
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.auth
+import io.github.dsyphr.dataClasses.User
 import io.github.dsyphr.dataClasses.joe
 import io.github.dsyphr.screens.chat.ChatScreen
 import io.github.dsyphr.screens.home.AddContact
@@ -71,12 +73,12 @@ class MainActivity : ComponentActivity() {
                             "home",
                         ) {
                             HomeScreen(
-                                onContactClick = { id -> navController.navigate("contact/$id") }, navController,
+                                onContactClick = { username -> navController.navigate("contact/$username") }, navController,
                                 Firebase.auth.currentUser?.uid )
 
                         }
                         composable(
-                            "contact/{id}", arguments = listOf(navArgument("id") { type = NavType.IntType }),
+                            "contact/{username}", arguments = listOf(navArgument("username") { type = NavType.StringType }),
                             enterTransition = {
                                 slideInHorizontally(
                                     initialOffsetX = { it }, animationSpec = tween(durationMillis = 300)
@@ -88,7 +90,8 @@ class MainActivity : ComponentActivity() {
                                 )
                             },
                         ) {
-                            ChatScreen(secondUser = joe, onBack = { navController.popBackStack() })
+                            val username = it.arguments?.getString("username")
+                            ChatScreen(secondUser = User(username.toString()), onBack = { navController.popBackStack() })
                         }
                     }
                 }
