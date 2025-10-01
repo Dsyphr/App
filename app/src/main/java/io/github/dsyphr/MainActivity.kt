@@ -20,7 +20,6 @@ import androidx.navigation.navArgument
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.auth
-import com.google.firebase.initialize
 import io.github.dsyphr.dataClasses.joe
 import io.github.dsyphr.screens.chat.ChatScreen
 import io.github.dsyphr.screens.home.AddContact
@@ -71,7 +70,10 @@ class MainActivity : ComponentActivity() {
                         composable(
                             "home",
                         ) {
-                            HomeScreen(onContactClick = { id -> navController.navigate("contact/$id") }, navController)
+                            HomeScreen(
+                                onContactClick = { id -> navController.navigate("contact/$id") }, navController,
+                                Firebase.auth.currentUser?.uid )
+
                         }
                         composable(
                             "contact/{id}", arguments = listOf(navArgument("id") { type = NavType.IntType }),
