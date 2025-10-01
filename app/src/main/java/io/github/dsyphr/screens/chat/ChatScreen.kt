@@ -1,5 +1,6 @@
 package io.github.dsyphr.screens.chat
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,13 +12,21 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.database.database
+import io.github.dsyphr.dataClasses.DatabaseMessageItem
+import io.github.dsyphr.dataClasses.MessageItem
 import io.github.dsyphr.dataClasses.User
 import io.github.dsyphr.dataClasses.messageItems
 import io.github.dsyphr.screens.chat.components.MessageCard
+
+
+fun generateChatId(uid1: String, uid2: String): String {
+    return if (uid1 < uid2) "${uid1}_${uid2}" else "${uid2}_${uid1}"
+}
 
 
 
@@ -25,6 +34,11 @@ val current_userID = Firebase.auth.currentUser?.uid.toString()
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(modifier: Modifier = Modifier, secondUser: User, onBack: () -> Unit = {}) {
+
+    val currentChatId = generateChatId(current_userID, secondUser.uid)
+
+
+
     Scaffold(
         topBar = {
 
@@ -57,7 +71,7 @@ fun ChatScreen(modifier: Modifier = Modifier, secondUser: User, onBack: () -> Un
 
             )
     }, bottomBar = {
-        BasicChatInput()
+        BasicChatInput(currentChatId = currentChatId)
     }, modifier = modifier.navigationBarsPadding()
     ) { innerPadding ->
 
@@ -73,12 +87,16 @@ fun ChatScreen(modifier: Modifier = Modifier, secondUser: User, onBack: () -> Un
     }
 }
 
-
 @Composable
-fun BasicChatInput(modifier: Modifier = Modifier) {
+fun BasicChatInput(modifier: Modifier = Modifier, currentChatId: String) {
     var message by remember { mutableStateOf("") }
+    val database = Firebase.database.reference.child("chats").child(currentChatId).child("messages")
 
-    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 15.dp, horizontal = 15.dp)) {
+
+
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .padding(vertical = 15.dp, horizontal = 15.dp)) {
         OutlinedTextField(
             // trailingIcon = { IconButton(onClick = {}) { Icon(Icons.Filled.Send, contentDescription = "send") } },
             shape = MaterialTheme.shapes.extraLarge,
@@ -89,9 +107,21 @@ fun BasicChatInput(modifier: Modifier = Modifier) {
             modifier = Modifier.weight(1f),
             placeholder = { Text("Type a message...") },
         )
+        val context = LocalContext.current
         FilledIconButton(
-            onClick = {},
-            modifier = Modifier.padding(start = 10.dp).size(50.dp),
+            onClick = {
+
+                val messageToSend = DatabaseMessageItem(
+                    message = message,
+                    senderID = current_userID,
+                )
+
+                database.push().setValue(messageToSend)
+                message = ""
+            },
+            modifier = Modifier
+                .padding(start = 10.dp)
+                .size(50.dp),
             shape = MaterialTheme.shapes.extraLarge,
         ) {
             Icon(
