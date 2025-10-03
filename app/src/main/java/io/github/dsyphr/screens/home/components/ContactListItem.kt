@@ -43,6 +43,7 @@ fun ContactListItem(
         lastMessage = ""
     }else {
         lastMessage = last.message
+        lastMessageTime = last.timestamp?.seconds.toString()
     }
 
     ListItem(modifier = modifier.padding(vertical = 2.dp), headlineContent = { Text(name) }, supportingContent = {

@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.google.firebase.Firebase
+import com.google.firebase.Timestamp
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -84,10 +85,15 @@ fun HomeScreen(onContactClick: (String, String) -> Unit = {_, _ ->}, navControll
                             try {
                                 val senderId = dataSnapshot.child("senderID").value?.toString() ?: ""
                                 val messageText = dataSnapshot.child("message").value?.toString() ?: ""
-
+                                val seconds = dataSnapshot.child("timestamp").child("seconds").value
                                 val messageItem = DatabaseMessageItem(
                                     message = messageText,
-                                    senderID = senderId
+                                    senderID = senderId,
+                                    timestamp = Timestamp(
+                                        seconds = seconds as Long,
+                                        nanoseconds = 0
+                                    )
+
                                 )
 
                                 // Find and update the specific contact in the state list
