@@ -185,15 +185,16 @@ fun BasicChatInput(modifier: Modifier = Modifier, currentChatId: String) {
         FilledIconButton(
             onClick = {
 
+                if (message.trim() != "") {
                 val messageToSend = DatabaseMessageItem(
-                    message = message,
+                    message = message.trim(),
                     senderID = current_userID,
                     timestamp = Timestamp.now(),
                 )
                 Firebase.database.reference.child("chats").child(currentChatId).child("lastmessage").setValue(messageToSend)
                 database.push().setValue(messageToSend)
                 message = ""
-            },
+                }},
             modifier = Modifier
                 .padding(start = 10.dp)
                 .size(50.dp),

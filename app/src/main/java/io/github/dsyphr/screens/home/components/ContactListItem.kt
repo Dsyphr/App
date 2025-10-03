@@ -24,6 +24,7 @@ import com.google.firebase.Timestamp
 import io.github.dsyphr.dataClasses.DatabaseMessageItem
 import io.github.dsyphr.dataClasses.MessageItem
 import io.github.dsyphr.enums.ReadStatus
+import io.github.dsyphr.screens.chat.components.customLocaleDateFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -43,7 +44,7 @@ fun ContactListItem(
         lastMessage = ""
     }else {
         lastMessage = last.message
-        lastMessageTime = last.timestamp?.seconds.toString()
+        lastMessageTime = customLocaleDateFormat(last.timestamp?.seconds?:0)
     }
 
     ListItem(modifier = modifier.padding(vertical = 2.dp), headlineContent = { Text(name) }, supportingContent = {

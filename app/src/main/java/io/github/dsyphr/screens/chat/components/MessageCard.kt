@@ -4,11 +4,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FiberManualRecord
+import androidx.compose.material.icons.outlined.FiberManualRecord
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,6 +23,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.dsyphr.dataClasses.MessageItem
 import io.github.dsyphr.dataClasses.User
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 
 @Composable
@@ -57,14 +66,11 @@ fun MessageCard(messageItem: MessageItem, secondUser: User) { // 1
                 )
             }
         }
-        Text(
-            // 4
-            text = when {
-                messageItem.sender.username == secondUser.username -> messageItem.sender.username; else -> "You"
-            },
-            fontSize = 12.sp,
+        Row {
+        Text(text= customLocaleDateFormat(messageItem.seconds?:0),
+                fontSize = 12.sp,
         )
-        Text(text=messageItem.seconds.toString())
+        }
     }
 }
 
@@ -77,3 +83,9 @@ fun cardShapeFor(messageItem: MessageItem, secondUser: User): RoundedCornerShape
     }
 }
 
+fun customLocaleDateFormat(timestamp:Long): String{
+    val time = Instant.ofEpochSecond(timestamp).atZone(ZoneId.systemDefault()).toLocalDateTime()
+    val formatter = DateTimeFormatter.ofPattern("hh:mm")
+    val formattedDate = time.format(formatter)
+    return formattedDate
+}
