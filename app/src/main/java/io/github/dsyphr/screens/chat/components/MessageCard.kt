@@ -64,6 +64,7 @@ fun MessageCard(messageItem: MessageItem, secondUser: User) { // 1
             },
             fontSize = 12.sp,
         )
+        Text(text=messageItem.seconds.toString())
     }
 }
 

@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.google.firebase.Firebase
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.auth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -59,10 +60,12 @@ fun ChatScreen(modifier: Modifier = Modifier, secondUser: User, onBack: () -> Un
                 for (message in dataSnapshot.children) {
                     val senderId = message.child("senderID").value.toString()
                     val text = message.child("message").value.toString()
+                    val timestamp = message.child("timestamp").child("nanoseconds").value as Long
 
                     val dbMessageItem = DatabaseMessageItem(
                         message = text,
-                        senderID = senderId
+                        senderID = senderId,
+                        timestamp = Timestamp.now(),
                     )
 
                     val job = CoroutineScope(Dispatchers.IO).async {
@@ -93,7 +96,7 @@ fun ChatScreen(modifier: Modifier = Modifier, secondUser: User, onBack: () -> Un
                     }
 
                     messageItems.clear()
-                    messageItems.addAll(newMessages.sortedBy { it.timestamp }.reversed()) // Or use timestamp if available
+                    messageItems.addAll(newMessages.sortedBy { it.seconds }.reversed()) // Or use timestamp if available
                 }
             }
 
@@ -181,6 +184,7 @@ fun BasicChatInput(modifier: Modifier = Modifier, currentChatId: String) {
                 val messageToSend = DatabaseMessageItem(
                     message = message,
                     senderID = current_userID,
+                    timestamp = Timestamp.now(),
                 )
                 Firebase.database.reference.child("chats").child(currentChatId).child("lastmessage").setValue(messageToSend)
                 database.push().setValue(messageToSend)

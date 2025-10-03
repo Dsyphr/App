@@ -20,13 +20,13 @@ data class UserProfile(val username: String, val email: String)
 data class MessageItem(
     val message: String,
     val sender: User,
-    val timestamp: Date? = null
+    val seconds: Long?=0,
 )
 
 data class DatabaseMessageItem(
     val message: String,
     val senderID: String,
-    val timestamp: Map<String, String> = ServerValue.TIMESTAMP
+    val timestamp: Timestamp? = null
 )
 
 
