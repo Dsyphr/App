@@ -60,12 +60,14 @@ fun ChatScreen(modifier: Modifier = Modifier, secondUser: User, onBack: () -> Un
                 for (message in dataSnapshot.children) {
                     val senderId = message.child("senderID").value.toString()
                     val text = message.child("message").value.toString()
-                    val timestamp = message.child("timestamp").child("nanoseconds").value as Long
-
+                    val seconds = message.child("timestamp").child("seconds").value as Long
                     val dbMessageItem = DatabaseMessageItem(
                         message = text,
                         senderID = senderId,
-                        timestamp = Timestamp.now(),
+                        timestamp = Timestamp(
+                            seconds = seconds,
+                            nanoseconds = 0
+                        )
                     )
 
                     val job = CoroutineScope(Dispatchers.IO).async {
@@ -90,7 +92,9 @@ fun ChatScreen(modifier: Modifier = Modifier, secondUser: User, onBack: () -> Un
                         newMessages.add(
                             MessageItem(
                                 dbMessageItem.message,
-                                sender = User(username, uid = dbMessageItem.senderID)
+                                sender = User(username, uid = dbMessageItem.senderID),
+                                seconds = dbMessageItem.timestamp?.seconds
+
                             )
                         )
                     }

@@ -36,11 +36,13 @@ fun ContactListItem(
 
     readStatus: Enum<ReadStatus> = ReadStatus.RECEIVED
 ) {
-    val lastMessageTime = "12:35 PM"
-    val lastMessage = last?.message.toString()
+    var lastMessageTime = "12:35 PM"
+    var lastMessage = ""
     if(last == null){
-        val lastMessageTime = "12:35 PM"
-        val lastMessage = ""
+        lastMessageTime = "12:35 PM"
+        lastMessage = ""
+    }else {
+        lastMessage = last.message
     }
 
     ListItem(modifier = modifier.padding(vertical = 2.dp), headlineContent = { Text(name) }, supportingContent = {
