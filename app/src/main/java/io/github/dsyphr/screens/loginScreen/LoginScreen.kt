@@ -128,7 +128,7 @@ fun LoginScreen(navController: NavController) {
             )
             Button(
                 onClick = {
-                    Firebase.auth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
+                    Firebase.auth.signInWithEmailAndPassword(email.trim(), password).addOnCompleteListener { task ->
                         if(task.isSuccessful){
                             navController.navigate("home")
                         }else{

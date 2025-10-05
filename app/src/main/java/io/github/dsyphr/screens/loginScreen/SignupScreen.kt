@@ -166,7 +166,7 @@ fun SignupScreen(navController: NavController) {
             Button(
                 onClick = {
 
-                    Firebase.auth.createUserWithEmailAndPassword(email, password)
+                    Firebase.auth.createUserWithEmailAndPassword(email.trim(), password.trim())
                         .addOnCompleteListener { task ->
                             val user = Firebase.auth.currentUser
                             if (task.isSuccessful) {
@@ -177,7 +177,7 @@ fun SignupScreen(navController: NavController) {
                                 user?.let {
                                     val userId = it.uid
                                     // Pass the retrieved userId to your database function
-                                    writeNewUser(userId = userId, email = email, name = username)
+                                    writeNewUser(userId = userId, email = email, name = username.trim())
 
                                     Toast.makeText(context, "Sign up was successful", Toast.LENGTH_SHORT).show()
                                     navController.popBackStack()
