@@ -39,6 +39,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
 import io.github.dsyphr.dataClasses.DatabaseMessageItem
+import io.github.dsyphr.enums.ReadStatus
 import io.github.dsyphr.screens.chat.current_userID
 import io.github.dsyphr.screens.chat.generateChatId
 import io.github.dsyphr.screens.home.components.ChatSearchBar
@@ -169,7 +170,8 @@ fun HomeScreen(onContactClick: (String, String) -> Unit = {_, _ ->}, navControll
                             onContactClick(contactsWithMessages[contact].username, contactsWithMessages[contact].contactId)
                         },
                         name = contactsWithMessages[contact].username,
-                        last = contactsWithMessages[contact].lastMessage
+                        last = contactsWithMessages[contact].lastMessage,
+                        readStatus = ReadStatus.READ,
                     )
                 }
             }

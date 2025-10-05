@@ -37,14 +37,14 @@ fun ContactListItem(
 
     readStatus: Enum<ReadStatus> = ReadStatus.RECEIVED
 ) {
-    var lastMessageTime = "12:35 PM"
+    var lastMessageTime = Timestamp.now().seconds
     var lastMessage = ""
     if(last == null){
-        lastMessageTime = "12:35 PM"
+        lastMessageTime = Timestamp.now().seconds
         lastMessage = ""
     }else {
         lastMessage = last.message
-        lastMessageTime = customLocaleDateFormat(last.timestamp?.seconds?:0)
+        lastMessageTime = last.timestamp?.seconds?: 0
     }
 
     ListItem(modifier = modifier.padding(vertical = 2.dp), headlineContent = { Text(name) }, supportingContent = {
@@ -57,7 +57,7 @@ fun ContactListItem(
         )
     }, trailingContent = {
         Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.SpaceEvenly) {
-            Text(lastMessageTime)
+            Text( customLocaleDateFormat(lastMessageTime) )
             when (readStatus) {
                 ReadStatus.RECEIVED -> {
                     val primaryColor = MaterialTheme.colorScheme.primary
