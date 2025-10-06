@@ -9,11 +9,9 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -22,8 +20,12 @@ import androidx.navigation.navArgument
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.auth
+import com.google.mlkit.common.model.DownloadConditions
+import com.google.mlkit.nl.translate.TranslateLanguage
+import com.google.mlkit.nl.translate.Translation
+import com.google.mlkit.nl.translate.Translator
+import com.google.mlkit.nl.translate.TranslatorOptions
 import io.github.dsyphr.dataClasses.User
-import io.github.dsyphr.dataClasses.joe
 import io.github.dsyphr.screens.chat.ChatScreen
 import io.github.dsyphr.screens.home.AddContact
 import io.github.dsyphr.screens.home.HomeScreen
@@ -33,12 +35,31 @@ import io.github.dsyphr.ui.theme.DsyphrTheme
 
 
 class MainActivity : ComponentActivity() {
+    private lateinit var englishToHindiTranslator: Translator
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         FirebaseApp.initializeApp(this)
+        // Initialize translator
+        englishToHindiTranslator = Translation.getClient(
+            TranslatorOptions.Builder()
+                .setSourceLanguage(TranslateLanguage.ENGLISH)
+                .setTargetLanguage(TranslateLanguage.HINDI)
+                .build()
+        )
 
+        // Preload the model
+        val conditions = DownloadConditions.Builder()
+            .requireWifi() // optional: only download on Wi-Fi
+            .build()
 
+        englishToHindiTranslator.downloadModelIfNeeded(conditions)
+            .addOnSuccessListener {
+                // Model ready for use
+            }
+            .addOnFailureListener { e ->
+                // Handle failure
+            }
 
         setContent {
             DsyphrTheme {
@@ -87,7 +108,7 @@ class MainActivity : ComponentActivity() {
                                 navArgument("username") {
                                     type = NavType.StringType
                                 },
-                                navArgument("uid"){
+                                navArgument("uid") {
                                     type = NavType.StringType
                                 }
                             ),
@@ -114,6 +135,11 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        englishToHindiTranslator.close() // Free resources
     }
 }
 
