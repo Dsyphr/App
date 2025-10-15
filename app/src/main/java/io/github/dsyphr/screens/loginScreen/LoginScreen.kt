@@ -129,10 +129,23 @@ fun LoginScreen(navController: NavController) {
             Button(
                 onClick = {
                     Firebase.auth.signInWithEmailAndPassword(email.trim(), password).addOnCompleteListener { task ->
-                        if(task.isSuccessful){
+                        if(task.isSuccessful && Firebase.auth.currentUser?.isEmailVerified == true){
                             navController.navigate("home")
                         }else{
-                            Toast.makeText(context,  "Email or password is incorrect", Toast.LENGTH_SHORT).show()
+                            if(Firebase.auth.currentUser == null){
+                                Toast.makeText(context,  "Email or password is incorrect", Toast.LENGTH_SHORT).show()
+                            }else{
+                                if(Firebase.auth.currentUser?.isEmailVerified == false){
+                                    Firebase.auth.currentUser?.sendEmailVerification()
+                                        ?.addOnCompleteListener { task ->
+                                            if(task.isSuccessful){
+                                                Toast.makeText(context,  "A verification link has been sent to your email", Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
+                                    Toast.makeText(context,  "Please verify your email.", Toast.LENGTH_SHORT).show()
+
+                                }
+                            }
                         }
                     }
 

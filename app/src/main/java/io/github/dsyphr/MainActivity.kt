@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
                     var start by remember {
                         mutableStateOf("")
                     }
-                    if (Firebase.auth.currentUser != null) {
+                    if (Firebase.auth.currentUser != null && Firebase.auth.currentUser?.isEmailVerified == true) {
                         start = "home"
                     } else {
                         start = "login"
