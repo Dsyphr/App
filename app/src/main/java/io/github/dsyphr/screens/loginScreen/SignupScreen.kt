@@ -21,7 +21,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -40,8 +43,11 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.google.android.gms.auth.api.Auth
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.database
 import io.github.dsyphr.dataClasses.UserProfile
 
@@ -63,16 +69,16 @@ fun writeNewUser(userId: String, name: String, email: String) {
 fun SignupScreen(navController: NavController) {
 
 
-    var email by remember {
+    var email by remember() {
         mutableStateOf("")
     }
-    var password by remember {
+    var password by remember() {
         mutableStateOf("")
     }
-    var confirm_password by remember {
+    var confirm_password by remember() {
         mutableStateOf("")
     }
-    var username by remember {
+    var username by remember() {
         mutableStateOf("")
     }
 
@@ -162,6 +168,7 @@ fun SignupScreen(navController: NavController) {
 
                     Firebase.auth.createUserWithEmailAndPassword(email.trim(), password.trim())
                         .addOnCompleteListener { task ->
+                            val user = Firebase.auth.currentUser
                             if (task.isSuccessful) {
                                 // Get the newly created user from the task result
                                 val user = Firebase.auth.currentUser
