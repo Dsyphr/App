@@ -46,6 +46,9 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.android.gms:play-services-auth:21.4.0")
     implementation("com.google.firebase:firebase-messaging")
+    implementation("com.google.mlkit:translate:17.0.2")
+// Optional: For better performance
+    implementation("com.google.android.gms:play-services-mlkit-language-id:17.0.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
