@@ -26,7 +26,8 @@ data class MessageItem(
 data class DatabaseMessageItem(
     val message: String,
     val senderID: String,
-    val timestamp: Timestamp? = null
+    val timestamp: Timestamp? = null,
+    val engMessage: String?
 )
 
 

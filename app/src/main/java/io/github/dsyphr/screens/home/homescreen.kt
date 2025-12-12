@@ -86,6 +86,7 @@ fun HomeScreen(onContactClick: (String, String) -> Unit = {_, _ ->}, navControll
                             try {
                                 val senderId = dataSnapshot.child("senderID").value?.toString() ?: ""
                                 val messageText = dataSnapshot.child("message").value?.toString() ?: ""
+                                val engMessage = dataSnapshot.child("engMessage").value?.toString() ?: ""
                                 val seconds = dataSnapshot.child("timestamp").child("seconds").value
                                 val messageItem = DatabaseMessageItem(
                                     message = messageText,
@@ -93,7 +94,8 @@ fun HomeScreen(onContactClick: (String, String) -> Unit = {_, _ ->}, navControll
                                     timestamp = Timestamp(
                                         seconds = seconds as Long,
                                         nanoseconds = 0
-                                    )
+                                    ),
+                                    engMessage = engMessage,
 
                                 )
 
@@ -127,7 +129,7 @@ fun HomeScreen(onContactClick: (String, String) -> Unit = {_, _ ->}, navControll
                     title = {
 
                         Text(
-                            "Dsyphr", style = TextStyle(
+                            "Dsyphr $", style = TextStyle(
                                 brush = Brush.horizontalGradient(
                                     colors = listOf(
                                         Color(0xFFF45DFF), Color(0xFF7907FF),
