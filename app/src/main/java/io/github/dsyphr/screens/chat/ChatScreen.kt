@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -35,26 +36,29 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
+enum class AppLanguage {
+    HINDI, BENGALI
+}
 
 fun generateChatId(uid1: String, uid2: String): String {
     return if (uid1 < uid2) "${uid1}_${uid2}" else "${uid2}_${uid1}"
 }
-
 
 val current_userID = Firebase.auth.currentUser?.uid.toString()
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(modifier: Modifier = Modifier, secondUser: User, onBack: () -> Unit = {}) {
-
     val currentChatId = generateChatId(current_userID, secondUser.uid)
     val database = Firebase.database.reference.child("chats").child(currentChatId).child("messages")
     val messageItems = remember { mutableStateListOf<MessageItem>() }
     val context = LocalContext.current
     val translationManager = remember { TranslationManager.getInstance(context) }
     var transMessage by remember { mutableStateOf("") }
+    var currentLanguage by remember { mutableStateOf(AppLanguage.HINDI) }
+    var showLanguageMenu by remember { mutableStateOf(false) }
 
-    LaunchedEffect(currentChatId) {
+    LaunchedEffect(currentChatId, currentLanguage) {
         database.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val newMessages = mutableListOf<MessageItem>()
@@ -76,7 +80,6 @@ fun ChatScreen(modifier: Modifier = Modifier, secondUser: User, onBack: () -> Un
                         engMessage = engText
                     )
 
-
                     val job = CoroutineScope(Dispatchers.IO).async {
                         val username = try {
                             Firebase.database.reference
@@ -95,25 +98,33 @@ fun ChatScreen(modifier: Modifier = Modifier, secondUser: User, onBack: () -> Un
                 }
 
                 CoroutineScope(Dispatchers.Main).launch {
-
                     usernameFetchJobs.awaitAll().forEach { (username, dbMessageItem) ->
-                        transMessage = if (dbMessageItem.engMessage == null || dbMessageItem.engMessage == "null") dbMessageItem.message else
-                            translationManager.translateEnglishToBengali(dbMessageItem.engMessage?:dbMessageItem.message)
-                                .getOrDefault(dbMessageItem.message)
+                        // Translate based on selected language
+                        transMessage = if (dbMessageItem.engMessage == null || dbMessageItem.engMessage == "null") {
+                            dbMessageItem.message
+                        } else {
+                            when (currentLanguage) {
+                                AppLanguage.HINDI -> translationManager.translateEnglishToHindi(
+                                    dbMessageItem.engMessage ?: dbMessageItem.message
+                                ).getOrDefault(dbMessageItem.message)
+                                AppLanguage.BENGALI -> translationManager.translateEnglishToBengali(
+                                    dbMessageItem.engMessage ?: dbMessageItem.message
+                                ).getOrDefault(dbMessageItem.message)
+                            }
+                        }
+
                         newMessages.add(
                             MessageItem(
                                 transMessage,
                                 sender = User(username, uid = dbMessageItem.senderID),
                                 seconds = dbMessageItem.timestamp?.seconds,
                                 originalMessage = dbMessageItem.message,
-
                             )
                         )
                     }
 
                     messageItems.clear()
-                    messageItems.addAll(newMessages.sortedBy { it.seconds }
-                        .reversed()) // Or use timestamp if available
+                    messageItems.addAll(newMessages.sortedBy { it.seconds }.reversed())
                 }
             }
 
@@ -123,10 +134,8 @@ fun ChatScreen(modifier: Modifier = Modifier, secondUser: User, onBack: () -> Un
         })
     }
 
-
     Scaffold(
         topBar = {
-
             TopAppBar(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -144,43 +153,99 @@ fun ChatScreen(modifier: Modifier = Modifier, secondUser: User, onBack: () -> Un
                 navigationIcon = {
                     IconButton(onClick = { onBack() }) {
                         Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back"
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
                         )
                     }
                 },
                 actions = {
+                    // Language toggle button
+                    TextButton(
+                        onClick = { showLanguageMenu = true },
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colorScheme.onSurface
+                        )
+                    ) {
+                        Text(
+                            text = when (currentLanguage) {
+                                AppLanguage.HINDI -> "हिं"
+                                AppLanguage.BENGALI -> "বাং"
+                            },
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = showLanguageMenu,
+                        onDismissRequest = { showLanguageMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("हिन्दी (Hindi)") },
+                            onClick = {
+                                currentLanguage = AppLanguage.HINDI
+                                showLanguageMenu = false
+                            },
+                            leadingIcon = {
+                                if (currentLanguage == AppLanguage.HINDI) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null
+                                    )
+                                }
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("বাংলা (Bengali)") },
+                            onClick = {
+                                currentLanguage = AppLanguage.BENGALI
+                                showLanguageMenu = false
+                            },
+                            leadingIcon = {
+                                if (currentLanguage == AppLanguage.BENGALI) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null
+                                    )
+                                }
+                            }
+                        )
+                    }
+
                     IconButton(onClick = {}) {
                         Icon(
-                            imageVector = Icons.Filled.MoreVert, contentDescription = "options"
+                            imageVector = Icons.Filled.MoreVert,
+                            contentDescription = "options"
                         )
                     }
                 },
-
-
-                )
-        }, bottomBar = {
-            BasicChatInput(currentChatId = currentChatId)
-        }, modifier = modifier.navigationBarsPadding()
+            )
+        },
+        bottomBar = {
+            BasicChatInput(
+                currentChatId = currentChatId,
+                currentLanguage = currentLanguage
+            )
+        },
+        modifier = modifier.navigationBarsPadding()
     ) { innerPadding ->
-
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             reverseLayout = true,
-            contentPadding = innerPadding// 5
+            contentPadding = innerPadding
         ) {
             items(messageItems) { messageItem ->
-
                 MessageCard(messageItem, secondUser)
-
             }
         }
-
-
     }
 }
 
 @Composable
-fun BasicChatInput(modifier: Modifier = Modifier, currentChatId: String) {
+fun BasicChatInput(
+    modifier: Modifier = Modifier,
+    currentChatId: String,
+    currentLanguage: AppLanguage
+) {
     val context = LocalContext.current
     val translationManager = remember { TranslationManager.getInstance(context) }
     val scope = rememberCoroutineScope()
@@ -189,21 +254,26 @@ fun BasicChatInput(modifier: Modifier = Modifier, currentChatId: String) {
     val database = Firebase.database.reference.child("chats").child(currentChatId).child("messages")
     var sending by remember { mutableStateOf(false) }
 
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 15.dp, horizontal = 15.dp)
     ) {
         OutlinedTextField(
-            // trailingIcon = { IconButton(onClick = {}) { Icon(Icons.Filled.Send, contentDescription = "send") } },
             shape = MaterialTheme.shapes.extraLarge,
             value = message,
             onValueChange = { newMessage: String ->
                 message = newMessage
             },
             modifier = Modifier.weight(1f),
-            placeholder = { Text("Type a message...") },
+            placeholder = {
+                Text(
+                    when (currentLanguage) {
+                        AppLanguage.HINDI -> "संदेश लिखें..."
+                        AppLanguage.BENGALI -> "বার্তা লিখুন..."
+                    }
+                )
+            },
         )
 
         FilledIconButton(
@@ -212,9 +282,13 @@ fun BasicChatInput(modifier: Modifier = Modifier, currentChatId: String) {
                 if (message.trim() != "") {
                     scope.launch {
                         try {
-                            // Translate message and wait for result
-                            engMessage = translationManager.translateHindiToEnglish(message)
-                                .getOrDefault("") // or use .fold({ it }, { "" })
+                            // Translate message based on current language
+                            engMessage = when (currentLanguage) {
+                                AppLanguage.HINDI -> translationManager.translateHindiToEnglish(message)
+                                    .getOrDefault("")
+                                AppLanguage.BENGALI -> translationManager.translateBengaliToEnglish(message)
+                                    .getOrDefault("")
+                            }
 
                             val messageToSend = DatabaseMessageItem(
                                 message = message.trim(),
@@ -223,19 +297,20 @@ fun BasicChatInput(modifier: Modifier = Modifier, currentChatId: String) {
                                 engMessage = if (engMessage.isEmpty()) null else engMessage
                             )
 
-                            // Firebase operations (these might need to be wrapped in withContext if blocking)
                             Firebase.database.reference.child("chats").child(currentChatId)
                                 .child("lastmessage").setValue(messageToSend).await()
 
                             database.push().setValue(messageToSend).await()
 
-                            // Clear message and update UI state
                             message = ""
                         } catch (e: Exception) {
-                            // Handle error appropriately
                             e.printStackTrace()
+                            Toast.makeText(
+                                context,
+                                "Failed to send message",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         } finally {
-                            // Always set sending to false when done
                             sending = false
                         }
                     }
@@ -263,7 +338,3 @@ fun BasicChatInput(modifier: Modifier = Modifier, currentChatId: String) {
         }
     }
 }
-
-
-
-
