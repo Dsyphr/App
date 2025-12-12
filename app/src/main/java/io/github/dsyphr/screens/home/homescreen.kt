@@ -141,7 +141,7 @@ fun HomeScreen(onContactClick: (String, String) -> Unit = {_, _ ->}, navControll
                     ),
 
                     actions = {
-                        IconButton(onClick = { /* do something */ }) {
+                        IconButton(onClick = { navController.navigate("settings") }) {
                             Icon(
                                 imageVector = Icons.Filled.Settings, contentDescription = "Settings"
                             )

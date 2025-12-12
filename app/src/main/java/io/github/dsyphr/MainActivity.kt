@@ -31,6 +31,7 @@ import io.github.dsyphr.dataClasses.User
 import io.github.dsyphr.screens.chat.ChatScreen
 import io.github.dsyphr.screens.home.AddContact
 import io.github.dsyphr.screens.home.HomeScreen
+import io.github.dsyphr.screens.home.SettingsScreen
 import io.github.dsyphr.screens.loginScreen.LoginScreen
 import io.github.dsyphr.screens.loginScreen.SignupScreen
 import io.github.dsyphr.ui.theme.DsyphrTheme
@@ -104,6 +105,9 @@ class MainActivity : ComponentActivity() {
                             "signup",
                         ) {
                             SignupScreen(navController)
+                        }
+                        composable ("settings") {
+                            SettingsScreen(navController)
                         }
                         composable(
                             "home",
