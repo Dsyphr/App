@@ -11,6 +11,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,12 +36,12 @@ fun SettingsScreen(navController: NavController){
     var username by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(true) }
 
-    val database = FirebaseDatabase.getInstance()
+    val database = Firebase.database.reference
     val currentUid = FirebaseAuth.getInstance().currentUser?.uid
 
     LaunchedEffect(Unit) {
         if (currentUid != null) {
-            val userRef = database.getReference(currentUid)
+            val userRef = database.child("users").child(currentUid)
 
             userRef.addListenerForSingleValueEvent(object: ValueEventListener{
                 override fun onDataChange(snapshot: DataSnapshot) {
@@ -81,10 +82,12 @@ fun SettingsScreen(navController: NavController){
                     modifier = Modifier.padding(8.dp)
                 )
 
-                IconButton(onClick = ({
+                TextButton(onClick = {
                     FirebaseAuth.getInstance().signOut()
-                    navController.popBackStack()
-                })) {
+                    navController.navigate("login") {
+                        popUpTo(0) { inclusive = true } // Clear entire back stack
+                    }
+                }) {
                     Text("Logout")
                 }
 
