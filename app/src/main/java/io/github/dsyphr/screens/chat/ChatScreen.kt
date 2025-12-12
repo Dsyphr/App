@@ -104,7 +104,8 @@ fun ChatScreen(modifier: Modifier = Modifier, secondUser: User, onBack: () -> Un
                             MessageItem(
                                 transMessage,
                                 sender = User(username, uid = dbMessageItem.senderID),
-                                seconds = dbMessageItem.timestamp?.seconds
+                                seconds = dbMessageItem.timestamp?.seconds,
+                                originalMessage = dbMessageItem.message,
 
                             )
                         )

@@ -21,6 +21,7 @@ data class MessageItem(
     val message: String,
     val sender: User,
     val seconds: Long?=0,
+    val originalMessage: String,
 )
 
 data class DatabaseMessageItem(

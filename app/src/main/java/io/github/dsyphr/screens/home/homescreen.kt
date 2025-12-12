@@ -129,7 +129,7 @@ fun HomeScreen(onContactClick: (String, String) -> Unit = {_, _ ->}, navControll
                     title = {
 
                         Text(
-                            "Dsyphr $", style = TextStyle(
+                            "Dsyphr", style = TextStyle(
                                 brush = Brush.horizontalGradient(
                                     colors = listOf(
                                         Color(0xFFF45DFF), Color(0xFF7907FF),

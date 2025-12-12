@@ -1,5 +1,6 @@
 package io.github.dsyphr.screens.chat.components
 
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -46,6 +47,7 @@ fun MessageCard(messageItem: MessageItem, secondUser: User) { // 1
     val scope = rememberCoroutineScope()
 
     var sentText by remember { mutableStateOf(value = "Sent") }
+    var translatedOrOriginal by remember { mutableStateOf(value = messageItem.sender.username == secondUser.username) }
 
     Column(
         modifier = Modifier
@@ -59,7 +61,7 @@ fun MessageCard(messageItem: MessageItem, secondUser: User) { // 1
         Row {
             messageItem.sender.profileImg
             Card(
-                modifier = Modifier.widthIn(max = 340.dp),
+                modifier = Modifier.widthIn(max = 340.dp).combinedClickable(onLongClick = {translatedOrOriginal = !translatedOrOriginal}, onClick = {}),
                 shape = cardShapeFor(messageItem, secondUser), // 3
                 colors = CardColors(
                     when {
@@ -76,7 +78,7 @@ fun MessageCard(messageItem: MessageItem, secondUser: User) { // 1
             ) {
                 Text(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    text = messageItem.message,
+                    text = if (translatedOrOriginal) messageItem.message else messageItem.originalMessage,
                     color = when {
                         messageItem.sender.username == secondUser.username -> MaterialTheme.colorScheme.onSecondaryContainer
                         else -> MaterialTheme.colorScheme.onPrimaryContainer
