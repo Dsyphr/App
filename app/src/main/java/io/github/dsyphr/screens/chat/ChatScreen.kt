@@ -37,7 +37,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 enum class AppLanguage {
-    HINDI, BENGALI
+    HINDI, BENGALI, ENGLISH
 }
 
 fun generateChatId(uid1: String, uid2: String): String {
@@ -105,11 +105,12 @@ fun ChatScreen(modifier: Modifier = Modifier, secondUser: User, onBack: () -> Un
                         } else {
                             when (currentLanguage) {
                                 AppLanguage.HINDI -> translationManager.translateEnglishToHindi(
-                                    dbMessageItem.engMessage ?: dbMessageItem.message
+                                    dbMessageItem.engMessage
                                 ).getOrDefault(dbMessageItem.message)
                                 AppLanguage.BENGALI -> translationManager.translateEnglishToBengali(
-                                    dbMessageItem.engMessage ?: dbMessageItem.message
+                                    dbMessageItem.engMessage
                                 ).getOrDefault(dbMessageItem.message)
+                                AppLanguage.ENGLISH -> dbMessageItem.engMessage
                             }
                         }
 
@@ -170,6 +171,7 @@ fun ChatScreen(modifier: Modifier = Modifier, secondUser: User, onBack: () -> Un
                             text = when (currentLanguage) {
                                 AppLanguage.HINDI -> "हिं"
                                 AppLanguage.BENGALI -> "বাং"
+                                AppLanguage.ENGLISH -> "En"
                             },
                             style = MaterialTheme.typography.labelLarge
                         )
@@ -194,6 +196,22 @@ fun ChatScreen(modifier: Modifier = Modifier, secondUser: User, onBack: () -> Un
                                 }
                             }
                         )
+                        DropdownMenuItem(
+                            text = { Text("English") },
+                            onClick = {
+                                currentLanguage = AppLanguage.ENGLISH
+                                showLanguageMenu = false
+                            },
+                            leadingIcon = {
+                                if (currentLanguage == AppLanguage.ENGLISH) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null
+                                    )
+                                }
+                            }
+                        )
+
                         DropdownMenuItem(
                             text = { Text("বাংলা (Bengali)") },
                             onClick = {
@@ -271,6 +289,7 @@ fun BasicChatInput(
                     when (currentLanguage) {
                         AppLanguage.HINDI -> "संदेश लिखें..."
                         AppLanguage.BENGALI -> "বার্তা লিখুন..."
+                        AppLanguage.ENGLISH -> "Send a message"
                     }
                 )
             },
@@ -288,6 +307,7 @@ fun BasicChatInput(
                                     .getOrDefault("")
                                 AppLanguage.BENGALI -> translationManager.translateBengaliToEnglish(message)
                                     .getOrDefault("")
+                                AppLanguage.ENGLISH -> message
                             }
 
                             val messageToSend = DatabaseMessageItem(
