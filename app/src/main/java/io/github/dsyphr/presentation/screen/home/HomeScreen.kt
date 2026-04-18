@@ -52,7 +52,7 @@ fun HomeScreen(
     LaunchedEffect(uiState.navigationTarget) {
         when (val target = uiState.navigationTarget) {
             is HomeNavigationTarget.Chat -> {
-                onNavigateToChat(target.username, target.contactId)
+                onNavigateToChat(target.username, target.chatId)
                 viewModel.clearNavigationTarget()
             }
             is HomeNavigationTarget.AddContact -> {
@@ -135,7 +135,7 @@ fun HomeScreen(
                 items(uiState.filteredContacts) { contact ->
                     Card(
                         onClick = {
-                            viewModel.navigateToChat(contact.username, contact.contactId)
+                            viewModel.navigateToChat(contact.username, contact.chatId)
                         },
                         modifier = Modifier
                             .fillMaxWidth()

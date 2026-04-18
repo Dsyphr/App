@@ -6,7 +6,6 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ServerValue
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.database
 import io.github.dsyphr.core.model.Message
 import io.github.dsyphr.core.repository.MessageRepository
 import io.github.dsyphr.core.repository.UserRepository
@@ -36,9 +35,17 @@ class FirebaseMessageRepository @Inject constructor(
     private val chatListeners = ConcurrentHashMap<String, ValueEventListener>()
     private val scope = CoroutineScope(Dispatchers.IO)
     private val allChatsListener: ValueEventListener = object : ValueEventListener {
-        override fun onDataChange(snapshot: com.google.firebase.database.DataSnapshot) {
-            snapshot.children.forEach { chatSnapshot ->
-                val chatId = chatSnapshot.key ?: return@forEach
+        override fun onDataChange(snapshot: DataSnapshot) {
+            val chatIds = snapshot.children.mapNotNull { it.key }.toSet()
+
+            chatListeners.keys
+                .toList()
+                .filter { it !in chatIds }
+                .forEach { chatId ->
+                    unsubscribeFromChatMessages(chatId)
+                }
+
+            chatIds.forEach { chatId ->
                 subscribeToChatMessages(chatId)
             }
         }
@@ -53,19 +60,49 @@ class FirebaseMessageRepository @Inject constructor(
     }
 
     override fun dispose() {
-        // No-op: singleton lifecycle managed by Hilt
+        database.child("chats").removeEventListener(allChatsListener)
+        chatListeners.keys.toList().forEach { chatId ->
+            unsubscribeFromChatMessages(chatId)
+        }
+        _messages.value = emptyMap()
     }
 
     private fun subscribeToAllChats() {
         database.child("chats").addValueEventListener(allChatsListener)
     }
+
+    private fun unsubscribeFromChatMessages(chatId: String) {
+        val listener = chatListeners.remove(chatId) ?: return
+        database.child("chats").child(chatId).child("messages").removeEventListener(listener)
+        _messages.value = _messages.value.toMutableMap().apply {
+            remove(chatId)
+        }
+    }
+
+    private fun parseTimestampMillis(snapshot: DataSnapshot): Long {
+        val value = snapshot.child("timestamp").value
+        return when (value) {
+            is Number -> value.toLong()
+            is Map<*, *> -> {
+                val seconds = (value["seconds"] as? Number)?.toLong()
+                val nanoseconds = (value["nanoseconds"] as? Number)?.toLong() ?: 0L
+                if (seconds != null) {
+                    (seconds * 1000L) + (nanoseconds / 1_000_000L)
+                } else {
+                    System.currentTimeMillis()
+                }
+            }
+
+            else -> System.currentTimeMillis()
+        }
+    }
     
     private fun subscribeToChatMessages(chatId: String) {
+        if (chatListeners.containsKey(chatId)) return
+
         val messagesRef = database.child("chats").child(chatId).child("messages")
         val listener = object : ValueEventListener {
-            override fun onDataChange(snapshot: com.google.firebase.database.DataSnapshot) {
-                val messagesList = mutableListOf<Message>()
-                
+            override fun onDataChange(snapshot: DataSnapshot) {
                 snapshot.children.forEach { messageSnapshot ->
                     try {
                         val messageId = messageSnapshot.key ?: return@forEach
@@ -73,10 +110,8 @@ class FirebaseMessageRepository @Inject constructor(
                         val messageText = messageSnapshot.child("message").getValue(String::class.java) ?: ""
                         val originalText = messageSnapshot.child("engMessage")
                             .getValue(String::class.java) ?: messageText
-                        
-                        val timestampSeconds = messageSnapshot.child("timestamp")
-                            .child("seconds")
-                            .getValue(Long::class.java) ?: System.currentTimeMillis() / 1000
+
+                        val timestampMillis = parseTimestampMillis(messageSnapshot)
                         
                         // Fetch username asynchronously
                         scope.launch {
@@ -89,7 +124,7 @@ class FirebaseMessageRepository @Inject constructor(
                                 originalText = originalText,
                                 senderId = senderId,
                                 senderUsername = senderUsername,
-                                timestamp = Date(timestampSeconds * 1000),
+                                timestamp = Date(timestampMillis),
                                 isRead = senderId != getCurrentUserId()
                             )
                             
@@ -136,10 +171,8 @@ class FirebaseMessageRepository @Inject constructor(
                     val senderId = messageSnapshot.child("senderID").getValue(String::class.java) ?: return@forEach
                     val messageText = messageSnapshot.child("message").getValue(String::class.java) ?: ""
                     val originalText = messageSnapshot.child("engMessage").getValue(String::class.java) ?: messageText
-                    
-                    val timestampSeconds = messageSnapshot.child("timestamp")
-                        .child("seconds")
-                        .getValue(Long::class.java) ?: System.currentTimeMillis() / 1000
+
+                    val timestampMillis = parseTimestampMillis(messageSnapshot)
                     
                     // Resolve username
                     val usernameResult = userRepository.getUsernameById(senderId)
@@ -151,7 +184,7 @@ class FirebaseMessageRepository @Inject constructor(
                         originalText = originalText,
                         senderId = senderId,
                         senderUsername = senderUsername,
-                        timestamp = Date(timestampSeconds * 1000),
+                        timestamp = Date(timestampMillis),
                         isRead = senderId != userId
                     )
                     messagesList.add(message)
@@ -183,16 +216,12 @@ class FirebaseMessageRepository @Inject constructor(
                 )
                 
                 val updates = mapOf(
-                    "chats" to mapOf(
-                        chatId to mapOf(
-                            "messages" to mapOf(messageId to messageData),
-                            "lastmessage" to mapOf(
-                                "senderID" to userId,
-                                "message" to text,
-                                "engMessage" to originalText,
-                                "timestamp" to ServerValue.TIMESTAMP
-                            )
-                        )
+                    "chats/$chatId/messages/$messageId" to messageData,
+                    "chats/$chatId/lastmessage" to mapOf(
+                        "senderID" to userId,
+                        "message" to text,
+                        "engMessage" to originalText,
+                        "timestamp" to ServerValue.TIMESTAMP
                     )
                 )
                 

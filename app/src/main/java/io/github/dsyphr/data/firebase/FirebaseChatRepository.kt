@@ -1,26 +1,23 @@
 package io.github.dsyphr.data.firebase
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ServerValue
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.database
-import io.github.dsyphr.core.model.Chat
-import io.github.dsyphr.core.model.Message
-import io.github.dsyphr.core.repository.ChatRepository
-import android.util.Log
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.tasks.await
+import io.github.dsyphr.core.model.Chat
+import io.github.dsyphr.core.model.Message
+import io.github.dsyphr.core.repository.ChatRepository
 import java.util.Date
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.Suppress
 
 @Singleton
 class FirebaseChatRepository @Inject constructor(
@@ -31,80 +28,159 @@ class FirebaseChatRepository @Inject constructor(
 
     private val _chats = MutableStateFlow<Map<String, Chat>>(emptyMap())
     override val chats: StateFlow<Map<String, Chat>> = _chats.asStateFlow()
-    
+
+    private var activeUserId: String? = null
+    private var userChatsRef: DatabaseReference? = null
+
     private val chatListeners = ConcurrentHashMap<String, ValueEventListener>()
-    
-    // Listen to user's chats (stored under users/{currentUserId}/chats)
+
+    private val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
+        rebindUserChats(firebaseAuth.currentUser?.uid)
+    }
+
+    // Listen to user's chats (stored under users/{currentUserId}/chats).
     private val userChatsListener = object : ValueEventListener {
-        override fun onDataChange(snapshot: com.google.firebase.database.DataSnapshot) {
-            snapshot.children.forEach { chatIdSnapshot ->
-                val chatId = chatIdSnapshot.key ?: return@forEach
+        override fun onDataChange(snapshot: DataSnapshot) {
+            val chatIds = snapshot.children.mapNotNull { it.key }.toSet()
+
+            chatListeners.keys
+                .toList()
+                .filter { it !in chatIds }
+                .forEach { chatId ->
+                    unsubscribeFromChat(chatId)
+                }
+
+            chatIds.forEach { chatId ->
                 subscribeToChat(chatId)
             }
         }
 
         override fun onCancelled(error: DatabaseError) {
-            android.util.Log.e("FirebaseChatRepo", "User chats listener cancelled: ${error.message}")
+            Log.e("FirebaseChatRepo", "User chats listener cancelled: ${error.message}")
         }
     }
 
     init {
-        subscribeToUserChats()
+        auth.addAuthStateListener(authStateListener)
+        rebindUserChats(auth.currentUser?.uid)
     }
 
     override fun dispose() {
-        // No-op: singleton lifecycle managed by Hilt
+        auth.removeAuthStateListener(authStateListener)
+        userChatsRef?.removeEventListener(userChatsListener)
+        chatListeners.keys.toList().forEach { chatId ->
+            unsubscribeFromChat(chatId)
+        }
+        _chats.value = emptyMap()
     }
 
-    private fun subscribeToUserChats() {
-        val userId = getCurrentUserId()
-        database.child("users").child(userId).child("chats").addValueEventListener(userChatsListener)
+    private fun rebindUserChats(userId: String?) {
+        if (activeUserId == userId) return
+
+        userChatsRef?.removeEventListener(userChatsListener)
+        userChatsRef = null
+
+        chatListeners.keys.toList().forEach { chatId ->
+            unsubscribeFromChat(chatId)
+        }
+
+        _chats.value = emptyMap()
+        activeUserId = userId
+
+        if (userId.isNullOrBlank()) return
+
+        userChatsRef = database.child("users").child(userId).child("chats")
+        userChatsRef?.addValueEventListener(userChatsListener)
     }
-    
+
+    private fun unsubscribeFromChat(chatId: String) {
+        val listener = chatListeners.remove(chatId) ?: return
+        database.child("chats").child(chatId).removeEventListener(listener)
+        _chats.value = _chats.value.toMutableMap().apply {
+            remove(chatId)
+        }
+    }
+
+    private fun parseTimestampMillis(snapshot: DataSnapshot): Long {
+        val value = snapshot.value
+        return when (value) {
+            is Number -> value.toLong()
+            is Map<*, *> -> {
+                val seconds = (value["seconds"] as? Number)?.toLong()
+                val nanoseconds = (value["nanoseconds"] as? Number)?.toLong() ?: 0L
+                if (seconds != null) {
+                    (seconds * 1000L) + (nanoseconds / 1_000_000L)
+                } else {
+                    System.currentTimeMillis()
+                }
+            }
+
+            else -> System.currentTimeMillis()
+        }
+    }
+
+    private fun parseParticipants(snapshot: DataSnapshot): List<String> {
+        val value = snapshot.value
+        return when (value) {
+            is List<*> -> value.filterIsInstance<String>()
+            is Map<*, *> -> value.values.filterIsInstance<String>()
+            else -> emptyList()
+        }
+    }
+
     private fun subscribeToChat(chatId: String) {
+        if (chatListeners.containsKey(chatId)) return
+
         val chatRef = database.child("chats").child(chatId)
         val listener = object : ValueEventListener {
-            override fun onDataChange(snapshot: com.google.firebase.database.DataSnapshot) {
-                if (!snapshot.exists()) return
-                
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (!snapshot.exists()) {
+                    _chats.value = _chats.value.toMutableMap().apply {
+                        remove(chatId)
+                    }
+                    return
+                }
+
                 val lastMessageSnapshot = snapshot.child("lastmessage")
-                
-                if (lastMessageSnapshot.exists()) {
+                val participants = parseParticipants(snapshot.child("participants"))
+
+                val lastMessage = if (lastMessageSnapshot.exists()) {
                     val senderId = lastMessageSnapshot.child("senderID").getValue(String::class.java) ?: ""
                     val messageText = lastMessageSnapshot.child("message").getValue(String::class.java) ?: ""
-                    val timestampSeconds = lastMessageSnapshot.child("timestamp")
-                        .child("seconds")
-                        .getValue(Long::class.java) ?: System.currentTimeMillis() / 1000
-                    
-                    val lastMessage = Message(
+                    val originalText = lastMessageSnapshot.child("engMessage").getValue(String::class.java) ?: messageText
+                    val timestampMillis = parseTimestampMillis(lastMessageSnapshot.child("timestamp"))
+
+                    Message(
                         id = "",
                         text = messageText,
-                        originalText = messageText,
+                        originalText = originalText,
                         senderId = senderId,
                         senderUsername = "Unknown",
-                        timestamp = Date(timestampSeconds * 1000),
+                        timestamp = Date(timestampMillis),
                         isRead = senderId != getCurrentUserId()
                     )
-                    
-                    val participants = snapshot.child("participants")
-                        .getValue(List::class.java) as? List<String> ?: emptyList()
-                    
-                    _chats.value = _chats.value.toMutableMap().apply {
-                        this[chatId] = Chat(
-                            id = chatId,
-                            participants = participants,
-                            lastMessage = lastMessage,
-                            updatedAt = Date(timestampSeconds * 1000)
-                        )
-                    }
+                } else {
+                    null
+                }
+
+                val updatedAtMillis = lastMessage?.timestamp?.time
+                    ?: parseTimestampMillis(snapshot.child("createdAt"))
+
+                _chats.value = _chats.value.toMutableMap().apply {
+                    this[chatId] = Chat(
+                        id = chatId,
+                        participants = participants,
+                        lastMessage = lastMessage,
+                        updatedAt = Date(updatedAtMillis)
+                    )
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                android.util.Log.e("FirebaseChatRepo", "Chat listener cancelled for $chatId: ${error.message}")
+                Log.e("FirebaseChatRepo", "Chat listener cancelled for $chatId: ${error.message}")
             }
         }
-        
+
         chatRef.addValueEventListener(listener)
         chatListeners[chatId] = listener
     }
@@ -167,23 +243,22 @@ class FirebaseChatRepository @Inject constructor(
                 if (lastMessageSnapshot.exists()) {
                     val senderId = lastMessageSnapshot.child("senderID").getValue(String::class.java) ?: ""
                     val messageText = lastMessageSnapshot.child("message").getValue(String::class.java) ?: ""
-                    val timestampSeconds = lastMessageSnapshot.child("timestamp")
-                        .child("seconds")
-                        .getValue(Long::class.java) ?: System.currentTimeMillis() / 1000
+                    val originalText = lastMessageSnapshot.child("engMessage").getValue(String::class.java) ?: messageText
+                    val timestampMillis = parseTimestampMillis(lastMessageSnapshot.child("timestamp"))
                     
                     lastMessage = Message(
                         id = "",
                         text = messageText,
-                        originalText = messageText,
+                        originalText = originalText,
                         senderId = senderId,
                         senderUsername = "Unknown",
-                        timestamp = Date(timestampSeconds * 1000),
+                        timestamp = Date(timestampMillis),
                         isRead = senderId != getCurrentUserId()
                     )
                 }
-                
-                val participants = snapshot.child("participants")
-                    .getValue(List::class.java) as? List<String> ?: listOf(participant1, participant2)
+
+                val participants = parseParticipants(snapshot.child("participants"))
+                    .ifEmpty { listOf(participant1, participant2) }
                 
                 Result.success(Chat(chatId, participants, lastMessage))
             } else {
@@ -194,7 +269,7 @@ class FirebaseChatRepository @Inject constructor(
         }
     }
 
-  override suspend fun getLastMessage(chatId: String): Result<Message?> {
+    override suspend fun getLastMessage(chatId: String): Result<Message?> {
         return try {
             val snapshot = database.child("chats").child(chatId).child("lastmessage").get().await()
             
@@ -204,17 +279,16 @@ class FirebaseChatRepository @Inject constructor(
             
             val senderId = snapshot.child("senderID").getValue(String::class.java) ?: ""
             val messageText = snapshot.child("message").getValue(String::class.java) ?: ""
-            val timestampSeconds = snapshot.child("timestamp")
-                .child("seconds")
-                .getValue(Long::class.java) ?: System.currentTimeMillis() / 1000
+            val originalText = snapshot.child("engMessage").getValue(String::class.java) ?: messageText
+            val timestampMillis = parseTimestampMillis(snapshot.child("timestamp"))
             
             val message = Message(
                 id = "",
                 text = messageText,
-                originalText = messageText,
+                originalText = originalText,
                 senderId = senderId,
                 senderUsername = "Unknown",
-                timestamp = Date(timestampSeconds * 1000),
+                timestamp = Date(timestampMillis),
                 isRead = senderId != getCurrentUserId()
             )
             

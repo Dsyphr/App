@@ -124,7 +124,7 @@ class HomeViewModelTest {
         assertTrue(state.navigationTarget is HomeNavigationTarget.Chat)
         val chatTarget = state.navigationTarget as HomeNavigationTarget.Chat
         assertEquals("Contact 1", chatTarget.username)
-        assertEquals("contact_1", chatTarget.contactId)
+        assertEquals("contact_1", chatTarget.chatId)
     }
 
     @Test

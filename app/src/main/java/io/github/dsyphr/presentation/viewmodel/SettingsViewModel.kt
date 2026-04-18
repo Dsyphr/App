@@ -2,14 +2,14 @@ package io.github.dsyphr.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseUser
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.dsyphr.core.repository.AuthRepository
 import io.github.dsyphr.core.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class SettingsUiState(
     val email: String = "",
@@ -22,7 +22,8 @@ sealed class SettingsNavigationTarget {
     object Login : SettingsNavigationTarget()
 }
 
-class SettingsViewModel(
+@HiltViewModel
+class SettingsViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository
 ) : ViewModel() {

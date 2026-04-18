@@ -2,18 +2,21 @@ package io.github.dsyphr.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.dsyphr.core.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class AddContactUiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null
 )
 
-class AddContactViewModel(
+@HiltViewModel
+class AddContactViewModel @Inject constructor(
     private val userRepository: UserRepository
 ) : ViewModel() {
 
@@ -22,7 +25,6 @@ class AddContactViewModel(
 
     fun addContact(
         username: String,
-        currentUid: String,
         onComplete: (String?) -> Unit
     ) {
         viewModelScope.launch {
@@ -52,7 +54,7 @@ class AddContactViewModel(
                                 isLoading = false,
                                 errorMessage = "Contact already exists"
                             )
-                            onComplete(uid)
+                            onComplete(null)
                         }
                     } else {
                         _uiState.value = _uiState.value.copy(

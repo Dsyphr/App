@@ -2,6 +2,7 @@ package io.github.dsyphr.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.dsyphr.core.model.Message
 import io.github.dsyphr.core.repository.ChatRepository
 import io.github.dsyphr.core.repository.UserRepository
@@ -9,10 +10,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class ContactWithLastMessage(
     val username: String,
     val contactId: String,
+    val chatId: String = contactId,
     val lastMessage: Message? = null
 )
 
@@ -26,13 +29,14 @@ data class HomeUiState(
 )
 
 sealed class HomeNavigationTarget {
-    data class Chat(val username: String, val contactId: String) : HomeNavigationTarget()
+    data class Chat(val username: String, val chatId: String) : HomeNavigationTarget()
     object AddContact : HomeNavigationTarget()
     object Settings : HomeNavigationTarget()
     object Login : HomeNavigationTarget()
 }
 
-class HomeViewModel(
+@HiltViewModel
+class HomeViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
     private val userRepository: UserRepository
 ) : ViewModel() {
@@ -77,6 +81,7 @@ class HomeViewModel(
                     ContactWithLastMessage(
                         username = username,
                         contactId = otherParticipant,
+                        chatId = chat.id,
                         lastMessage = chat.lastMessage
                     )
                 }
@@ -114,9 +119,9 @@ class HomeViewModel(
         )
     }
 
-    fun navigateToChat(username: String, contactId: String) {
+    fun navigateToChat(username: String, chatId: String) {
         _uiState.value = _uiState.value.copy(
-            navigationTarget = HomeNavigationTarget.Chat(username, contactId)
+            navigationTarget = HomeNavigationTarget.Chat(username, chatId)
         )
     }
 
@@ -133,7 +138,12 @@ class HomeViewModel(
     }
 
     fun onLogout() {
+        _currentUserId.value = null
         _uiState.value = _uiState.value.copy(
+            contacts = emptyList(),
+            filteredContacts = emptyList(),
+            searchQuery = "",
+            isLoading = false,
             navigationTarget = HomeNavigationTarget.Login
         )
     }

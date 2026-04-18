@@ -3,12 +3,13 @@ package io.github.dsyphr.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.dsyphr.core.repository.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class SignupUiState(
     val username: String = "",
@@ -21,7 +22,8 @@ data class SignupUiState(
     val emailSent: Boolean = false
 )
 
-class SignupViewModel(
+@HiltViewModel
+class SignupViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ) : ViewModel() {
 

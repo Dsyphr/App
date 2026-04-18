@@ -1,6 +1,5 @@
 package io.github.dsyphr.presentation.screen.login
 
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -22,13 +21,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -43,11 +41,16 @@ import io.github.dsyphr.presentation.viewmodel.SignupViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignupScreen(
-    onNavigateToHome: () -> Unit,
+    onSignupComplete: () -> Unit,
     viewModel: SignupViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
+
+    LaunchedEffect(uiState.success) {
+        if (uiState.success) {
+            onSignupComplete()
+        }
+    }
 
     Scaffold(
         modifier = Modifier,

@@ -1,6 +1,5 @@
 package io.github.dsyphr.presentation.screen.login
 
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -22,13 +21,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -38,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.dsyphr.R
+import io.github.dsyphr.presentation.viewmodel.LoginNavigationTarget
 import io.github.dsyphr.presentation.viewmodel.LoginViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,7 +47,23 @@ fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
+
+    LaunchedEffect(uiState.navigationTarget) {
+        when (uiState.navigationTarget) {
+            LoginNavigationTarget.Home -> {
+                onNavigateToHome()
+                viewModel.clearNavigationTarget()
+            }
+
+            LoginNavigationTarget.Signup -> {
+                onNavigateToSignup()
+                viewModel.clearNavigationTarget()
+            }
+
+            LoginNavigationTarget.ShowVerificationEmail,
+            null -> Unit
+        }
+    }
 
     Scaffold(
         modifier = Modifier,
@@ -127,7 +142,7 @@ fun LoginScreen(
             }
             TextButton(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = onNavigateToSignup
+                onClick = viewModel::onNavigateToSignup
             ) {
                 Text("Don't have an account? Sign up")
             }

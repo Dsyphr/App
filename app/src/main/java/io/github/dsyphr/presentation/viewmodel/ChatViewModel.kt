@@ -2,6 +2,7 @@ package io.github.dsyphr.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.dsyphr.core.model.AppLanguage
 import io.github.dsyphr.core.model.Message
 import io.github.dsyphr.core.repository.MessageRepository
@@ -12,6 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class ChatUiState(
     val messages: List<Message> = emptyList(),
@@ -25,7 +27,8 @@ data class ChatUiState(
     val chatId: String = ""
 )
 
-class ChatViewModel(
+@HiltViewModel
+class ChatViewModel @Inject constructor(
     private val translationEngine: TranslationEngine,
     private val messageRepository: MessageRepository
 ) : ViewModel() {

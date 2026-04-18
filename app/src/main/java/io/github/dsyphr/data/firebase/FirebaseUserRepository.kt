@@ -1,22 +1,22 @@
 package io.github.dsyphr.data.firebase
 
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.database
 import io.github.dsyphr.core.model.User
 import io.github.dsyphr.core.repository.UserRepository
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class FirebaseUserRepository @Inject constructor(
     private val database: DatabaseReference,
-    private val currentUserId: String? = null
+    private val auth: FirebaseAuth
 ) : UserRepository {
+
+    private fun getCurrentUserId(): String? = auth.currentUser?.uid
 
     override val users: MutableStateFlow<Map<String, User>> = MutableStateFlow(emptyMap())
 
@@ -106,7 +106,7 @@ class FirebaseUserRepository @Inject constructor(
 
     override suspend fun getContacts(): Result<Map<String, String>> {
         return try {
-            val userId = currentUserId ?: return Result.failure(Exception("No current user"))
+            val userId = getCurrentUserId() ?: return Result.failure(Exception("No current user"))
             val snapshot = database.child("users").child(userId).child("contacts").get().await()
             
             if (!snapshot.exists()) {
@@ -127,7 +127,7 @@ class FirebaseUserRepository @Inject constructor(
 
     override suspend fun removeContact(contactUid: String): Result<Unit> {
         return try {
-            val userId = currentUserId ?: return Result.failure(Exception("No current user"))
+            val userId = getCurrentUserId() ?: return Result.failure(Exception("No current user"))
             database.child("users").child(userId).child("contacts").child(contactUid).removeValue().await()
             Result.success(Unit)
         } catch (e: Exception) {
@@ -156,7 +156,7 @@ class FirebaseUserRepository @Inject constructor(
 
     override suspend fun addContact(contactUid: String, username: String): Result<Unit> {
         return try {
-            val userId = currentUserId ?: return Result.failure(Exception("No current user"))
+            val userId = getCurrentUserId() ?: return Result.failure(Exception("No current user"))
             database.child("users").child(userId).child("contacts").child(contactUid).setValue(username).await()
             Result.success(Unit)
         } catch (e: Exception) {

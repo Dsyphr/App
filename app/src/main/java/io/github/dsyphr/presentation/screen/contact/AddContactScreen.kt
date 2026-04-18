@@ -37,7 +37,6 @@ import io.github.dsyphr.presentation.viewmodel.AddContactViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddContactScreen(
-    currentUid: String?,
     onBack: () -> Unit,
     onContactAdded: () -> Unit,
     viewModel: AddContactViewModel = hiltViewModel()
@@ -94,11 +93,11 @@ fun AddContactScreen(
 
             Button(
                 onClick = {
-                    viewModel.addContact(username, currentUid ?: "") { addedUid ->
+                    viewModel.addContact(username) { addedUid ->
                         if (addedUid != null) {
                             onContactAdded()
+                            onBack()
                         }
-                        onBack()
                     }
                 },
                 enabled = username.isNotEmpty(),

@@ -1,7 +1,6 @@
 package io.github.dsyphr
 
 import android.Manifest
-import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -14,49 +13,28 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
- import androidx.core.app.ActivityCompat
-    import androidx.core.content.ContextCompat
-    import androidx.lifecycle.compose.collectAsStateWithLifecycle
-    import androidx.lifecycle.lifecycleScope
-    import androidx.navigation.NavType
-    import androidx.navigation.compose.NavHost
-    import androidx.navigation.compose.composable
-    import androidx.navigation.compose.rememberNavController
-    import androidx.navigation.navArgument
-    import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.firebase.Firebase
+import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.google.firebase.FirebaseApp
-import com.google.firebase.auth.auth
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
-import io.github.dsyphr.presentation.screen.chat.ChatScreen
 import io.github.dsyphr.presentation.screen.contact.AddContactScreen
+import io.github.dsyphr.presentation.screen.chat.ChatScreen
 import io.github.dsyphr.presentation.screen.home.HomeScreen
-import io.github.dsyphr.presentation.screen.settings.SettingsScreen
 import io.github.dsyphr.presentation.screen.login.LoginScreen
 import io.github.dsyphr.presentation.screen.login.SignupScreen
-import io.github.dsyphr.presentation.viewmodel.HomeNavigationTarget
+import io.github.dsyphr.presentation.screen.settings.SettingsScreen
 import io.github.dsyphr.presentation.viewmodel.HomeViewModel
-import io.github.dsyphr.presentation.viewmodel.ChatViewModel
 import io.github.dsyphr.ui.theme.DsyphrTheme
-import io.github.dsyphr.core.repository.ChatRepository
-    import io.github.dsyphr.core.repository.MessageRepository
-    import kotlinx.coroutines.launch
-    import javax.inject.Inject
 
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
-    @Inject
-    lateinit var chatRepository: ChatRepository
-
-    @Inject
-    lateinit var messageRepository: MessageRepository
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -100,32 +78,44 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     val homeViewModel: HomeViewModel = hiltViewModel()
 
-                    var start by remember {
-                        mutableStateOf("login")
-                    }
-                    val currentUser = Firebase.auth.currentUser
-
-                    if (currentUser != null && currentUser.isEmailVerified) {
-                        start = "home"
+                    val currentUser = FirebaseAuth.getInstance().currentUser
+                    val startDestination = if (currentUser != null && currentUser.isEmailVerified) {
+                        "home"
+                    } else {
+                        "login"
                     }
 
-                    NavHost(navController, startDestination = start) {
+                    NavHost(navController, startDestination = startDestination) {
                         composable("login") {
                             LoginScreen(
                                 onNavigateToSignup = { navController.navigate("signup") },
-                                onNavigateToHome = { navController.navigate("home") }
+                                onNavigateToHome = {
+                                    navController.navigate("home") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
+                                }
                             )
                         }
+
                         composable("signup") {
                             SignupScreen(
-                                onNavigateToHome = { navController.navigate("home") }
+                                onSignupComplete = {
+                                    navController.navigate("login") {
+                                        popUpTo("signup") { inclusive = true }
+                                    }
+                                }
                             )
                         }
+
                         composable("home") {
-                            LaunchedEffect(currentUser?.uid) {
-                                currentUser?.uid?.let { homeViewModel.setCurrentUserId(it) }
+                            val activeUser = FirebaseAuth.getInstance().currentUser
+
+                            LaunchedEffect(activeUser?.uid) {
+                                activeUser?.uid?.let { uid ->
+                                    homeViewModel.setCurrentUserId(uid)
+                                }
                             }
-                            
+
                             HomeScreen(
                                 onNavigateToChat = { username, uid ->
                                     navController.navigate("chat/$uid/$username")
@@ -140,13 +130,16 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
                         }
+
                         composable("addContact") {
                             AddContactScreen(
-                                currentUid = currentUser?.uid,
                                 onBack = { navController.popBackStack() },
-                                onContactAdded = { }
+                                onContactAdded = {
+                                    homeViewModel.loadContacts()
+                                }
                             )
                         }
+
                         composable("settings") {
                             SettingsScreen(
                                 onLogout = {
@@ -157,6 +150,7 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
                         }
+
                         composable(
                             "chat/{uid}/{username}",
                             arguments = listOf(
@@ -178,16 +172,11 @@ class MainActivity : ComponentActivity() {
                         ) {
                             val uid = it.arguments?.getString("uid")
                             val username = it.arguments?.getString("username")
-                            val chatViewModel: ChatViewModel = hiltViewModel()
-                            
-                            LaunchedEffect(uid) {
-                                chatViewModel.setChatId(uid ?: "")
-                            }
-                            
+
                             ChatScreen(
                                 chatId = uid ?: "",
                                 contactUsername = username ?: "Chat",
-                                onBack = { 
+                                onBack = {
                                     navController.popBackStack()
                                     homeViewModel.clearNavigationTarget()
                                 }
@@ -198,13 +187,4 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        lifecycleScope.launch {
-            chatRepository.dispose()
-            messageRepository.dispose()
-        }
-    }
 }
-
