@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!-- Ignore the given warnings -->
+    <issue id="AdapterViewChildren">
+        <ignore path="res/layout/*" />
+    </issue>
+    <issue id="AppCompatMethod">
+        <ignore path="res/layout/*" />
+    </issue>
+    <issue id="ContentDescription">
+        <ignore path="res/layout/*" />
+    </issue>
+    <issue id="CustomViewStyleable">
+        <ignore path="res/layout/*" />
+    </issue>
+    <issue id="MissingDefaultResource">
+        <ignore path="res/values/*" />
+    </issue>
+    <issue id="MissingTranslation">
+        <ignore path="res/values/*" />
+    </issue>
+    <issue id="StringFormatCount">
+        <ignore path="res/values/*" />
+    </issue>
+    <issue id="StringFormatMatches">
+        <ignore path="res/values/*" />
+    </issue>
+    <issue id="TextFields">
+        <ignore path="res/layout/*" />
+    </issue>
+    <issue id="UnusedResources">
+        <ignore path="res/drawable/*" />
+    </issue>
+    <issue id="VectorPath">
+        <ignore path="res/drawable/*" />
+    </issue>
+    <issue id="VectorRaster">
+        <ignore path="res/drawable/*" />
+    </issue>
+    <issue id="ViewConstructor">
+        <ignore path="src/main/java/*" />
+    </issue>
+    <issue id="ViewTags">
+        <ignore path="res/layout/*" />
+    </issue>
+    <issue id="ClickableViewAccessibility">
+        <ignore path="src/main/java/*" />
+    </issue>
+    <issue id="MissingPrefix">
+        <ignore path="src/main/java/*" />
+    </issue>
+    <issue id="GradleDependency">
+        <ignore path="*" />
+    </issue>
+    <issue id="GradleOverrides">
+        <ignore path="*" />
+    </issue>
+    <issue id="GradleCompatible">
+        <ignore path="*" />
+    </issue>
+    <issue id="AndroidGradlePluginVersion">
+        <ignore path="*" />
+    </issue>
+    <issue id="NewApi">
+        <ignore path="*" />
+    </issue>
+    <issue id="ExtraText">
+        <ignore path="*" />
+    </issue>
+    <issue id="InconsistentArrays">
+        <ignore path="*" />
+    </issue>
+    <issue id="ObsoleteLayoutParam">
+        <ignore path="*" />
+    </issue>
+    <issue id="HardcodedText">
+        <ignore path="*" />
+    </issue>
+    <issue id="MissingConstraints">
+        <ignore path="*" />
+    </issue>
+    <issue id="SuspiciousImport">
+        <ignore path="*" />
+    </issue>
+    <issue id="UnknownId">
+        <ignore path="*" />
+    </issue>
+    <issue id="UnknownIdInLayout">
+        <ignore path="*" />
+    </issue>
+    <issue id="UnusedAttribute">
+        <ignore path="*" />
+    </issue>
+    <issue id="UnusedQuantity">
+        <ignore path="*" />
+    </issue>
+    <issue id="UnusedIds">
+        <ignore path="*" />
+    </issue>
+    <issue id="UselessLeaf">
+        <ignore path="*" />
+    </issue>
+    <issue id="UseAlpha2">
+        <ignore path="*" />
+    </issue>
+    <issue id="UseCompoundDrawables">
+        <ignore path="*" />
+    </issue>
+    <issue id="UseCheckPermission">
+        <ignore path="*" />
+    </issue>
+    <issue id="VectorDrawableCompat">
+        <ignore path="*" />
+    </issue>
+    <issue id="ViewPadding">
+        <ignore path="*" />
+    </issue>
+    <issue id="Wakelock">
+        <ignore path="*" />
+    </issue>
+    <issue id="WakelockTimeout">
+        <ignore path="*" />
+    </issue>
+    <issue id="WrongCall">
+        <ignore path="*" />
+    </issue>
+    <issue id="WrongRegion">
+        <ignore path="*" />
+    </issue>
+    <issue id="WrongManifestParent">
+        <ignore path="*" />
+    </issue>
+    <issue id="ExportedActivity">
+        <ignore path="*" />
+    </issue>
+    <issue id="ExportedReceiver">
+        <ignore path="*" />
+    </issue>
+    <issue id="ExportedService">
+        <ignore path="*" />
+    </issue>
+    <issue id="PrivateApi">
+        <ignore path="*" />
+    </issue>
+    <issue id="InvalidPackage">
+        <ignore path="*" />
+    </issue>
+    <issue id="GoogleAppIndexingApiWarning">
+        <ignore path="*" />
+    </issue>
+    <issue id="GoogleAppIndexingWarning">
+        <ignore path="*" />
+    </issue>
+    <issue id="InstantApps">
+        <ignore path="*" />
+    </issue>
+    <issue id="MissingId">
+        <ignore path="*" />
+    </issue>
+    <issue id="DuplicateIncludedIds">
+        <ignore path="*" />
+    </issue>
+    <issue id="InvalidId">
+        <ignore path="*" />
+    </issue>
+    <issue id="ExtraTranslation">
+        <ignore path="*" />
+    </issue>
+    <issue id="ImpliedQuantity">
+        <ignore path="*" />
+    </issue>
+    <issue id="Typos">
+        <ignore path="*" />
+    </issue>
+    <issue id="TypographyDashes">
+        <ignore path="*" />
+    </issue>
+    <issue id="TypographyEllipsis">
+        <ignore path="*" />
+    </issue>
+    <issue id="TypographyOther">
+        <ignore path="*" />
+    </issue>
+    <issue id="TypographyQuotes">
+        <ignore path="*" />
+    </issue>
+    <issue id="TypographySmartQuotes">
+        <ignore path="*" />
+    </issue>
+    <issue id="TypographyDiacritical">
+        <ignore path="*" />
+    </issue>
+    <issue id="TypographyQuotes">
+        <ignore path="*" />
+    </issue>
+    <issue id="TypographyDiacritical">
+        <ignore path="*" />
+    </issue>
+    <issue id="TypographyQuotes">
+        <ignore path="*" />
+    </issue>
+    <issue id="TypographyDiacritical">
+        <ignore path="*" />
+    </issue>
+    <issue id="TypographyQuotes">
+        <ignore path="*" />
+    </issue>
+    <issue id="TypographyDiacritical">
+        <ignore path="*" />
+    </issue>
+</lint>
